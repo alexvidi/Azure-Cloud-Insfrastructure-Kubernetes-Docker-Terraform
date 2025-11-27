@@ -28,7 +28,7 @@ COPY requirements.txt .
 # Install Python dependencies:
 # --user         → install packages for the current user (not system-wide).
 # --no-cache-dir → avoid keeping pip cache to reduce the final image size.
-RUN pip install --user --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # -----------------------------------------------------------------------------
 # RUNTIME CONFIGURATION

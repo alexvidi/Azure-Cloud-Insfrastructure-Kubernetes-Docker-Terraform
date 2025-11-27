@@ -37,7 +37,7 @@ spec:
         - name: nn-predictor-container
 
           # Docker image stored in Azure Container Registry.
-          image: alexdevops99acr.azurecr.io/nn-predictor:v1
+          image: alexdevops99acr.azurecr.io/nn-predictor:v2
 
           # Internal port exposed by the container (Uvicorn listens here).
           ports:

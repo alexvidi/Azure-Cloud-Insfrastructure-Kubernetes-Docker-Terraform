@@ -54,8 +54,15 @@ NN-DEVOPS-CHALLENGE/
 │   ├── main.py           # FastAPI application (health + predict)
 │   └── requirements.txt  # Python dependencies
 │
-├── images/
-│   └── architecture_overview.png   # Architecture image
+├── images/               # Architecture diagram and screenshots
+│   ├── architecture_overview.png       # High-level architecture (Terraform + ACR + AKS + FastAPI)
+│   ├── resources_created.png           # Terraform apply output (resources created)
+│   ├── azure_rg_overview.png           # Azure Resource Group overview (AKS + ACR)
+│   ├── docker_images.png               # Docker Desktop: local + ACR-tagged images
+│   ├── acr_repo_nn_predictor.png       # Azure Container Registry repo for nn-predictor
+│   ├── aks_deployment_nn_predictor.png # AKS deployment with running pod
+│   ├── fastapi_docs_health.png         # FastAPI docs – /health endpoint
+│   └── fastapi_docs_predict.png        # FastAPI docs – /predict endpoint
 │
 ├── infra/
 │   ├── main.tf           # Resource Group + Azure Container Registry
@@ -70,5 +77,22 @@ NN-DEVOPS-CHALLENGE/
 │
 ├── .gitignore            # Ignore Python, Terraform and editor-specific files
 └── README.md             # Project overview, architecture and documentation
+```
 
+## Screenshots
 
+### Architecture overview
+![Architecture overview](images/architecture_overview.png)
+
+### Terraform-managed infrastructure
+![Terraform apply outputs](images/resources_created.png)
+![Azure resource group](images/azure_rg_overview.png)
+
+### Docker image and Azure Container Registry
+![Docker images](images/docker_images.png)
+![ACR nn-predictor repository](images/acr_repo_nn_predictor.png)
+
+### AKS deployment and FastAPI endpoints
+![AKS deployment](images/aks_deployment_nn_predictor.png)
+![FastAPI /health endpoint](images/fastapi_docs_health.png)
+![FastAPI /predict endpoint](images/fastapi_docs_predict.png)
