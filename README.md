@@ -81,9 +81,6 @@ NN-DEVOPS-CHALLENGE/
 
 ## Screenshots
 
-### Architecture overview
-![Architecture overview](images/architecture_overview.png)
-
 ### Terraform-managed infrastructure
 ![Terraform apply outputs](images/resources_created.png)
 ![Azure resource group](images/azure_rg_overview.png)
