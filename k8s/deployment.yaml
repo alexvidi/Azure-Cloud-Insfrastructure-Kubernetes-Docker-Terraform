@@ -1,0 +1,55 @@
+# -----------------------------------------------------------------------------
+# Kubernetes Deployment for the NN Predictor API
+# -----------------------------------------------------------------------------
+# Ensures that a Pod with our Docker image is always running.
+# -----------------------------------------------------------------------------
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  # Name of the Deployment in the cluster.
+  name: nn-predictor-deploy
+
+spec:
+  # Number of replicas (Pods) to run.
+  replicas: 1
+
+  # The Deployment manages Pods that match this label selector.
+  selector:
+    matchLabels:
+      app: nn-predictor-app
+
+  # Pod template: defines how the Pods should look.
+  template:
+    metadata:
+      # Labels that will be attached to the Pods.
+      # The Service will use the same label to route traffic.
+      labels:
+        app: nn-predictor-app
+
+    spec:
+      # Secret with Docker registry credentials for Azure Container Registry.
+      imagePullSecrets:
+        - name: acr-secret
+
+      containers:
+        - name: nn-predictor-container
+
+          # Docker image stored in Azure Container Registry.
+          image: alexdevops99acr.azurecr.io/nn-predictor:v1
+
+          # Internal port exposed by the container (Uvicorn listens here).
+          ports:
+            - containerPort: 8000
+
+          # Basic resource configuration 
+          resources:
+            requests:
+              cpu: 100m      # 0.1 CPU core requested
+              memory: 128Mi  # 128 MiB RAM requested
+            limits:
+              cpu: 500m      # Max 0.5 CPU core
+              memory: 512Mi  # Max 512 MiB RAM
+
+

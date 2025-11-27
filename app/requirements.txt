@@ -1,0 +1,9 @@
+# -----------------------------------------------------------------------------
+# Python dependencies for the NN Predictor API
+# -----------------------------------------------------------------------------
+# FastAPI is the web framework used to define the HTTP API (endpoints).
+fastapi==0.109.0
+
+# Uvicorn is the ASGI server that runs the FastAPI application.
+# It listens for HTTP requests and forwards them to FastAPI.
+uvicorn==0.27.0

@@ -1,0 +1,38 @@
+# -----------------------
+# Python
+# -----------------------
+__pycache__/
+*.py[cod]
+
+# Local virtual environments
+.env
+.venv
+venv/
+env/
+
+# -----------------------
+# Editor / OS files
+# -----------------------
+.vscode/
+.DS_Store
+Thumbs.db
+
+# -----------------------
+# Terraform
+# -----------------------
+# Local Terraform working directory
+.terraform/
+
+# Terraform lock file
+.terraform.lock.hcl
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform plan files
+*.tfplan
+
+# Terraform crash logs
+crash.log
+crash.*.log

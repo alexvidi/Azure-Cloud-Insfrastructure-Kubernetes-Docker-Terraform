@@ -1,0 +1,29 @@
+# -----------------------------------------------------------------------------
+# Kubernetes Service for the NN Predictor API
+# -----------------------------------------------------------------------------
+# Exposes the Pods from the Deployment through an external IP in Azure.
+# -----------------------------------------------------------------------------
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  # Name of the Service in the cluster.
+  name: nn-predictor-service
+
+spec:
+  # "LoadBalancer" creates a public load balancer with an external IP.
+  type: LoadBalancer
+
+  # The Service sends traffic only to Pods with this label.
+  selector:
+    app: nn-predictor-app
+
+  ports:
+    - protocol: TCP
+
+      # External port exposed by the load balancer (HTTP standard port).
+      port: 80
+
+      # Internal container port (must match containerPort in the Deployment).
+      targetPort: 8000
