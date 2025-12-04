@@ -1,4 +1,4 @@
-# NN DevOps Challenge – Azure AKS FastAPI Terraform – Infrastructure Demo
+# Cloud Infrastructure Deployment with Kubernetes, Docker & Terraform
 
 ## 1. Project Overview
 
@@ -97,3 +97,4 @@ NN-DEVOPS-CHALLENGE/
 ### FastAPI endpoints
 ![FastAPI /health endpoint](images/status_health_ok.png)
 ![FastAPI /predict endpoint](images/api_predict_web.png)
+
