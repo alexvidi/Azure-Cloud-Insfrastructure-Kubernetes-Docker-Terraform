@@ -54,7 +54,7 @@ The “prediction” is intentionally **mocked** (not a real neural network or t
 ## 4. Repository Structure
 
 ```text
-NN-DEVOPS-CHALLENGE/
+Azure Cloud Insfrastructure Kubernetes Docker Terraform/
 ├── app/
 │   ├── Dockerfile        # Docker image for the FastAPI app
 │   ├── main.py           # FastAPI application (health + predict)
@@ -104,3 +104,15 @@ NN-DEVOPS-CHALLENGE/
 ![FastAPI /health endpoint](images/status_health_ok.png)
 ![FastAPI /predict endpoint](images/api_predict_web.png)
 
+## Contributing
+Contributions are welcome! Open an issue or pull request for suggestions, improvements, or fixes.
+
+## Author
+**Alexandre Vidal**  
+Email: alexvidaldepalol@gmail.com  
+[LinkedIn](https://www.linkedin.com/in/alexandre-vidal-de-palol-a18538155/)  
+[GitHub](https://github.com/alexvidi)
+
+**Project Repository:** [Azure-Cloud-Insfrastructure-Kubernetes-Docker-Terraform](https://github.com/alexvidi/Azure-Cloud-Insfrastructure-Kubernetes-Docker-Terraform)
+
+---
