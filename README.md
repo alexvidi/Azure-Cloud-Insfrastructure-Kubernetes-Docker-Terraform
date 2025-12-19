@@ -1,15 +1,19 @@
-# Cloud Infrastructure Deployment with Kubernetes, Docker & Terraform
+# End-to-End DevOps: Deploying FastAPI on AKS with Terraform
 
-## 1. Project Overview
+[![Terraform](https://img.shields.io/badge/IaC-Terraform-623CE4?logo=terraform)](https://www.terraform.io/)
+[![Azure](https://img.shields.io/badge/Cloud-Azure-0089D6?logo=microsoftazure)](https://azure.microsoft.com/)
+[![Kubernetes](https://img.shields.io/badge/Orchestration-Kubernetes-326CE5?logo=kubernetes)](https://kubernetes.io/)
+[![FastAPI](https://img.shields.io/badge/Framework-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 
-This repository shows how to deploy a small API to **Azure Kubernetes Service (AKS)** using:
+## Project Overview
 
-- A **FastAPI** application in Python.
-- A **Docker** image built from that app.
-- **Terraform** to provision Azure resources (Resource Group, Azure Container Registry, AKS).
-- **Kubernetes manifests** to run the container and expose it through a public LoadBalancer.
+**NN Predictor** is a cloud-native demo project that showcases how to take a lightweight API from local development to a real, scalable deployment using modern DevOps practices.
 
-The application itself is intentionally simple: it simulates a prediction service so the focus stays on **infrastructure and deployment practices**.
+The API simulates a simple **price prediction service** for **cryptocurrency (and other market) symbols** such as `BTC` or `ETH`. It exposes:
+- `GET /health` for service monitoring, and
+- `POST /predict` which returns a **mock predicted price** for a given `symbol`.
+
+The “prediction” is intentionally **mocked** (not a real neural network or trading model) to keep the focus on what this repository is really about: **production-like infrastructure and deployment workflows**.
 
 ## 2. Architecture Diagram
 
@@ -17,20 +21,20 @@ The application itself is intentionally simple: it simulates a prediction servic
 
 ---
 
-## 3. High-Level Architecture
+## From Code to Cloud
 
 1. **Application (FastAPI)**  
    - `GET /health`: basic health check.  
-   - `POST /predict?symbol=BTC`: returns a fake “predicted” price (random integer).
+   - `POST /predict`: returns a mock “predicted” price for a given `symbol` (e.g., BTC, ETH).
 
 2. **Containerization (Docker)**  
-   - A Docker image is built from the FastAPI app and pushed to **Azure Container Registry (ACR)**.
+   - A Docker image is built from the FastAPI app and pushed to a container registry (e.g., **Azure Container Registry / ACR**).
 
 3. **Infrastructure (Terraform)**  
-   - Creates a **Resource Group**, **ACR**, and an **AKS** cluster.
+   - Creates the required cloud resources (e.g., **Resource Group**, **Container Registry**, **Kubernetes cluster**).
 
 4. **Orchestration (Kubernetes)**  
-   - A **Deployment** runs the Docker image as a Pod in AKS.  
+   - A **Deployment** runs the Docker image as Pods in the cluster.  
    - A **Service** of type `LoadBalancer` exposes the API on port **80** with a public IP.
 
 ---
@@ -44,7 +48,7 @@ The application itself is intentionally simple: it simulates a prediction servic
 - **Orchestration**: Kubernetes (Deployment, Service)
 
 ---
-# prova
+
 ## 4. Repository Structure
 
 ```text
