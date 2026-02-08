@@ -6,12 +6,14 @@ on:
       - "infra/**/*.tf"
       - "infra/**/*.tfvars"
       - "infra/**"
+      - "k8s/**"
   push:
     branches: ["master"]
     paths:
       - "infra/**/*.tf"
       - "infra/**/*.tfvars"
       - "infra/**"
+      - "k8s/**"
 
 jobs:
   terraform:
