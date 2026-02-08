@@ -19,7 +19,23 @@ spec:
 
   syncPolicy:
     automated:
-      prune: true
+      prune: false
       selfHeal: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 2m
     syncOptions:
       - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: nn-predictor-deploy
+      namespace: fastapi
+      jsonPointers:
+        - /spec/replicas
+
