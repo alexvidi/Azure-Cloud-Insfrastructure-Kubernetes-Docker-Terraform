@@ -43,13 +43,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: "latest"
-
-      - name: Validate manifests (client-side dry-run)
+      - name: Install kubeconform
         run: |
-          kubectl apply --dry-run=client --validate=false -f k8s/deployment.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/service.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/hpa.yaml           
+          curl -sSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz -o kubeconform.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
+
+      - name: Validate Kubernetes manifests (schema)
+        run: |
+          kubeconform -strict -summary k8s/deployment.yaml
+          kubeconform -strict -summary k8s/service.yaml
+          kubeconform -strict -summary k8s/hpa.yaml           
