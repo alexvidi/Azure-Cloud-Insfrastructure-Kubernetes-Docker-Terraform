@@ -29,6 +29,13 @@ spec:
         app: nn-predictor-app
 
     spec:
+    
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
 
       containers:
         - name: nn-predictor-container
@@ -40,7 +47,6 @@ spec:
           ports:
             - containerPort: 8000
           
-            
           readinessProbe:
             httpGet:
               path: /health
@@ -68,4 +74,9 @@ spec:
               cpu: 500m      # Max 0.5 CPU core
               memory: 512Mi  # Max 512 MiB RAM
 
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
