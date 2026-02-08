@@ -36,3 +36,4 @@ crash.*.log
 
 # Terraform plan output
 infra/tfplan
+
