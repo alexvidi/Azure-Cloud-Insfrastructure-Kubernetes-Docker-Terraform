@@ -11,6 +11,15 @@ metadata:
   # Name of the Service in the cluster.
   name: nn-predictor-service
 
+  labels:
+    app.kubernetes.io/name: nn-predictor
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: aks-fastapi-demo
+    app.kubernetes.io/managed-by: kubectl
+
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/health"  
+
 spec:
   # "LoadBalancer" creates a public load balancer with an external IP.
   type: LoadBalancer
