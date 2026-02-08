@@ -1,0 +1,31 @@
+alertmanager:
+  enabled: false
+
+pushgateway:
+  enabled: false
+
+# si te quedas corto de RAM, pon esto a false también.
+kubeStateMetrics:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 96Mi
+    limits:
+      cpu: 150m
+      memory: 192Mi
+
+nodeExporter:
+  enabled: false
+
+server:
+  persistentVolume:
+    enabled: false
+  retention: "6h"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
