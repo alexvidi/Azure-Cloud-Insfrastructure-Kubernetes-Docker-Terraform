@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: nn-predictor-app
+        annotations:
+          kubernetes.io/change-cause: "helm {{ .Release.Name }} rev {{ .Release.Revision }} | chart {{ .Chart.Version }} | image {{ .Values.image.repository }}:{{ .Values.image.tag }}"
         {{- include "nn-predictor.labels" . | nindent 8 }}
     spec:
       securityContext:
