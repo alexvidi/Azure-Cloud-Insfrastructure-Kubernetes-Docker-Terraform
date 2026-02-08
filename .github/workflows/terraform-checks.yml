@@ -1,6 +1,7 @@
 name: Terraform checks
 
 on:
+  workflow_dispatch:  
   pull_request:
     paths:
       - "infra/**/*.tf"
