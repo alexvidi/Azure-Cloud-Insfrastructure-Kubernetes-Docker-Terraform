@@ -4,15 +4,13 @@ on:
   workflow_dispatch:  
   pull_request:
     paths:
-      - "infra/**/*.tf"
-      - "infra/**/*.tfvars"
+      - ".github/workflows/**"  
       - "infra/**"
       - "k8s/**"
   push:
     branches: ["master"]
     paths:
-      - "infra/**/*.tf"
-      - "infra/**/*.tfvars"
+      - ".github/workflows/**"
       - "infra/**"
       - "k8s/**"
 
