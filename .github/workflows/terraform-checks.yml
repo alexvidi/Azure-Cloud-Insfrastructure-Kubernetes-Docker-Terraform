@@ -7,12 +7,14 @@ on:
       - ".github/workflows/**"  
       - "infra/**"
       - "k8s/**"
+      - "helm/**"
   push:
     branches: ["master"]
     paths:
       - ".github/workflows/**"
       - "infra/**"
       - "k8s/**"
+      - "helm/**"
 
 jobs:
   terraform:
@@ -52,6 +54,30 @@ jobs:
 
       - name: Validate Kubernetes manifests (schema)
         run: |
-          kubeconform -strict -summary k8s/deployment.yaml
-          kubeconform -strict -summary k8s/service.yaml
-          kubeconform -strict -summary k8s/hpa.yaml           
+          kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version 1.33.0 k8s/deployment.yaml
+          kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version 1.33.0 k8s/service.yaml
+          kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version 1.33.0 k8s/hpa.yaml
+          
+  helm-chart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz -o kubeconform.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
+
+      - name: Helm lint
+        run: helm lint helm/nn-predictor
+
+      - name: Helm template + kubeconform
+        run: |
+          helm template nn-predictor helm/nn-predictor -n fastapi > rendered.yaml
+          kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version 1.33.0 rendered.yaml        
