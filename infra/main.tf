@@ -21,5 +21,5 @@ resource "azurerm_container_registry" "acr" {
   sku = "Basic"
 
   # Enabled for easier development (not recommended for production).
-  admin_enabled = true
+  admin_enabled = false
 }
