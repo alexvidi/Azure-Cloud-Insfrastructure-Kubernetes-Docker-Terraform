@@ -7,7 +7,7 @@ terraform {
   required_providers {
     azurerm = {
       # Source location of the Azure provider in the Terraform registry.
-      source  = "hashicorp/azurerm"
+      source = "hashicorp/azurerm"
       # Use any 3.x version. This keeps it stable.
       version = "~> 3.0"
     }
