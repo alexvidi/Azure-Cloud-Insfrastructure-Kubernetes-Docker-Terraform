@@ -13,7 +13,7 @@ metadata:
 
 spec:
   # Number of replicas (Pods) to run.
-  replicas: 1
+  replicas: 2
 
   # The Deployment manages Pods that match this label selector.
   selector:
@@ -29,19 +29,35 @@ spec:
         app: nn-predictor-app
 
     spec:
-      # Secret with Docker registry credentials for Azure Container Registry.
-      imagePullSecrets:
-        - name: acr-secret
 
       containers:
         - name: nn-predictor-container
 
           # Docker image stored in Azure Container Registry.
-          image: alexdevops99acr.azurecr.io/nn-predictor:v2
+          image: alexdevops99acr.azurecr.io/fastapi-predictor:v1
 
           # Internal port exposed by the container (Uvicorn listens here).
           ports:
             - containerPort: 8000
+          
+            
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
 
           # Basic resource configuration 
           resources:
