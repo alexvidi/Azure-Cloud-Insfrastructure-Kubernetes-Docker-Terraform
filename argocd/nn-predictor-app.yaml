@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nn-predictor
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/alexvidi/azure-aks-fastapi-terraform.git
+    targetRevision: HEAD
+    path: helm/nn-predictor
+    helm:
+      releaseName: nn-predictor
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fastapi
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
