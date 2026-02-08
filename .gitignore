@@ -33,3 +33,6 @@ Thumbs.db
 # Terraform crash logs
 crash.log
 crash.*.log
+
+# Terraform plan output
+infra/tfplan
