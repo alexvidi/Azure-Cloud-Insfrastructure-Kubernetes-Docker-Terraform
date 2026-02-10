@@ -1,4 +1,4 @@
-# End-to-End DevOps: FastAPI on AKS with Terraform
+# Cloud-Native FastAPI on Azure: AKS, Terraform, Helm, and Observability
 
 [![Terraform](https://img.shields.io/badge/IaC-Terraform-623CE4?logo=terraform)](https://www.terraform.io/)
 [![Azure](https://img.shields.io/badge/Cloud-Azure-0089D6?logo=microsoftazure)](https://azure.microsoft.com/)
