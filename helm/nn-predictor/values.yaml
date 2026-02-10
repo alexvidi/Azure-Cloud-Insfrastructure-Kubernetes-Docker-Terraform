@@ -1,17 +1,38 @@
+# -----------------------------------------------------------------------------
+# Default values for nn-predictor Helm chart
+#
+# Goal:
+# - Centralize the runtime and infrastructure settings consumed by templates.
+# - Keep environment-specific tuning in one place.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# REPLICA CONFIGURATION
+# -----------------------------------------------------------------------------
 replicaCount: 2
 
+# -----------------------------------------------------------------------------
+# CONTAINER IMAGE SETTINGS
+# -----------------------------------------------------------------------------
 image:
   repository: alexdevops99acr.azurecr.io/fastapi-predictor
   tag: v1
   pullPolicy: IfNotPresent
 
+# -----------------------------------------------------------------------------
+# SERVICE EXPOSURE
+# -----------------------------------------------------------------------------
 service:
   type: LoadBalancer
   port: 80
   targetPort: 8000
   annotations:
+    # Azure LoadBalancer health probe route.
     service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/health"
 
+# -----------------------------------------------------------------------------
+# CONTAINER RESOURCE REQUESTS AND LIMITS
+# -----------------------------------------------------------------------------
 resources:
   requests:
     cpu: 100m
@@ -20,6 +41,9 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+# -----------------------------------------------------------------------------
+# HEALTH PROBES
+# -----------------------------------------------------------------------------
 probes:
   readiness:
     path: /health
@@ -34,11 +58,17 @@ probes:
     timeoutSeconds: 2
     failureThreshold: 3
 
+# -----------------------------------------------------------------------------
+# POD SECURITY CONTEXT
+# -----------------------------------------------------------------------------
 securityContext:
   runAsNonRoot: true
   runAsUser: 1000
   runAsGroup: 1000
 
+# -----------------------------------------------------------------------------
+# HORIZONTAL POD AUTOSCALER (HPA)
+# -----------------------------------------------------------------------------
 autoscaling:
   enabled: true
   minReplicas: 2

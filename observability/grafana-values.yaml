@@ -1,9 +1,28 @@
+# -----------------------------------------------------------------------------
+# Grafana Helm values for observability stack
+#
+# Goal:
+# - Configure a lightweight Grafana deployment for AKS environments.
+# - Define service exposure, resource limits, and Prometheus data source.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# STORAGE
+# -----------------------------------------------------------------------------
+# Disable persistence to keep this setup ephemeral and simple.
 persistence:
   enabled: false
 
+# -----------------------------------------------------------------------------
+# SERVICE CONFIGURATION
+# -----------------------------------------------------------------------------
+# ClusterIP keeps Grafana internal to the cluster network.
 service:
   type: ClusterIP
 
+# -----------------------------------------------------------------------------
+# RESOURCE REQUESTS AND LIMITS
+# -----------------------------------------------------------------------------
 resources:
   requests:
     cpu: 50m
@@ -12,8 +31,15 @@ resources:
     cpu: 200m
     memory: 256Mi
 
+# -----------------------------------------------------------------------------
+# ADMIN USER
+# -----------------------------------------------------------------------------
 adminUser: admin
 
+# -----------------------------------------------------------------------------
+# DATASOURCES
+# -----------------------------------------------------------------------------
+# Preconfigure Prometheus as the default data source.
 datasources:
   datasources.yaml:
     apiVersion: 1

@@ -1,4 +1,16 @@
+{{/*
+# -----------------------------------------------------------------------------
+# Helm template: HorizontalPodAutoscaler for NN Predictor
+#
+# Goal:
+# - Optionally scale pods based on CPU utilization.
+# - Render this resource only when autoscaling.enabled is true.
+# -----------------------------------------------------------------------------
+*/}}
 {{- if .Values.autoscaling.enabled }}
+# -----------------------------------------------------------------------------
+# HPA RESOURCE
+# -----------------------------------------------------------------------------
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

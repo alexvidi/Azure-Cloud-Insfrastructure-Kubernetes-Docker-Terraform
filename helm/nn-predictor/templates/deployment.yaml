@@ -1,9 +1,28 @@
+# -----------------------------------------------------------------------------
+# Helm template: Deployment for NN Predictor API
+#
+# Goal:
+# - Define desired pod replicas and rollout behavior.
+# - Configure image, probes, resources, and security settings.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# WORKLOAD DEFINITION
+# -----------------------------------------------------------------------------
 apiVersion: apps/v1
 kind: Deployment
+
+# -----------------------------------------------------------------------------
+# METADATA
+# -----------------------------------------------------------------------------
 metadata:
   name: nn-predictor-deploy
   labels:
     {{- include "nn-predictor.labels" . | nindent 4 }}
+
+# -----------------------------------------------------------------------------
+# DEPLOYMENT SPECIFICATION
+# -----------------------------------------------------------------------------
 spec:
   revisionHistoryLimit: 3
   replicas: {{ .Values.replicaCount }}
@@ -11,12 +30,16 @@ spec:
     matchLabels:
       app: nn-predictor-app
   template:
+    # Pod labels and rollout traceability metadata.
     metadata:
       labels:
         app: nn-predictor-app
         {{- include "nn-predictor.labels" . | nindent 8 }}
       annotations:
+        # Tracks image and chart versions used by this rollout.
         kubernetes.io/change-cause: "image={{ .Values.image.repository }}:{{ .Values.image.tag }} | chart={{ .Chart.Name }}-{{ .Chart.Version }}"
+
+    # Pod-level execution and container configuration.
     spec:
       securityContext:
         runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
@@ -28,6 +51,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+          # Controls when traffic can be routed to this pod.
           readinessProbe:
             httpGet:
               path: {{ .Values.probes.readiness.path }}
@@ -36,6 +60,7 @@ spec:
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          # Restarts the container if the application stops responding.
           livenessProbe:
             httpGet:
               path: {{ .Values.probes.liveness.path }}

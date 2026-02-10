@@ -1,10 +1,26 @@
+# -----------------------------------------------------------------------------
+# Prometheus Helm values for observability stack
+#
+# Goal:
+# - Run a resource-conscious Prometheus setup on AKS.
+# - Enable only core components needed for metrics collection.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# OPTIONAL COMPONENTS
+# -----------------------------------------------------------------------------
+# Disable Alertmanager in this baseline setup.
 alertmanager:
   enabled: false
 
+# Disable Pushgateway when not collecting short-lived job metrics.
 pushgateway:
   enabled: false
 
-# si te quedas corto de RAM, pon esto a false también.
+# -----------------------------------------------------------------------------
+# KUBE STATE METRICS
+# -----------------------------------------------------------------------------
+# Set this to false if cluster RAM becomes constrained.
 kubeStateMetrics:
   enabled: true
   resources:
@@ -15,13 +31,25 @@ kubeStateMetrics:
       cpu: 150m
       memory: 192Mi
 
+# -----------------------------------------------------------------------------
+# NODE EXPORTER
+# -----------------------------------------------------------------------------
+# Disable node-level metrics exporter in this lightweight profile.
 nodeExporter:
   enabled: false
 
+# -----------------------------------------------------------------------------
+# PROMETHEUS SERVER
+# -----------------------------------------------------------------------------
 server:
+  # Disable persistence for ephemeral demo/lab environments.
   persistentVolume:
     enabled: false
+
+  # Keep short retention to reduce memory and storage usage.
   retention: "6h"
+
+  # Resource profile for the Prometheus server container.
   resources:
     requests:
       cpu: 100m

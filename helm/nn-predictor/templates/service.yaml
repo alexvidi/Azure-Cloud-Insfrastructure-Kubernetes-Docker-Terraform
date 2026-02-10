@@ -1,3 +1,14 @@
+# -----------------------------------------------------------------------------
+# Helm template: Service for NN Predictor API
+#
+# Goal:
+# - Expose application pods using a Kubernetes Service.
+# - Map external service port to the container target port.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# SERVICE RESOURCE
+# -----------------------------------------------------------------------------
 apiVersion: v1
 kind: Service
 metadata:
@@ -5,6 +16,7 @@ metadata:
   labels:
     {{- include "nn-predictor.labels" . | nindent 4 }}
   annotations:
+    # Cloud provider specific settings are defined in values.yaml.
     {{- toYaml .Values.service.annotations | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}

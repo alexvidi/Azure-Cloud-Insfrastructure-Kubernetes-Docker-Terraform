@@ -1,6 +1,22 @@
+# -----------------------------------------------------------------------------
+# Helm chart metadata for NN Predictor
+#
+# Goal:
+# - Describe the chart package and app version used for deployment.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# CHART API AND IDENTITY
+# -----------------------------------------------------------------------------
 apiVersion: v2
 name: nn-predictor
 description: FastAPI predictor deployed on AKS (Deployment + Service + optional HPA)
 type: application
+
+# -----------------------------------------------------------------------------
+# VERSIONING
+# -----------------------------------------------------------------------------
+# version    -> chart package version (changes when chart templates/values change).
+# appVersion -> deployed application version/tag reference.
 version: 0.1.0
 appVersion: "v1"
