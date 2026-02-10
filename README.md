@@ -1,118 +1,161 @@
-# End-to-End DevOps: Deploying FastAPI on AKS with Terraform
+# End-to-End DevOps: FastAPI on AKS with Terraform
 
 [![Terraform](https://img.shields.io/badge/IaC-Terraform-623CE4?logo=terraform)](https://www.terraform.io/)
 [![Azure](https://img.shields.io/badge/Cloud-Azure-0089D6?logo=microsoftazure)](https://azure.microsoft.com/)
 [![Kubernetes](https://img.shields.io/badge/Orchestration-Kubernetes-326CE5?logo=kubernetes)](https://kubernetes.io/)
 [![FastAPI](https://img.shields.io/badge/Framework-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 
-## Project Overview
+## Overview
 
-**NN Predictor** is a cloud-native demo project that showcases how to take a lightweight API from local development to a real, scalable deployment using modern DevOps practices.
+`NN Predictor` is a complete DevOps project that shows how to move an API from local code to a cloud environment on Azure.
 
-The API simulates a simple **price prediction service** for **cryptocurrency (and other market) symbols** such as `BTC` or `ETH`. It exposes:
-- `GET /health` for service monitoring, and
-- `POST /predict` which returns a **mock predicted price** for a given `symbol`.
+The main focus is not building a real Machine Learning model, but demonstrating good practices in:
 
-The “prediction” is intentionally **mocked** (not a real neural network or trading model) to keep the focus on what this repository is really about: **production-like infrastructure and deployment workflows**.
+- infrastructure as code,
+- Kubernetes deployment,
+- observability,
+- and continuous quality checks with CI.
 
-## 2. Architecture Diagram
+The API returns simulated predictions to keep the application layer simple and highlight platform and operations work.
 
-![Architecture overview for NN DevOps Challenge](./images/architecture_overview.png)
+## What the Project Does
 
----
+The project implements this end-to-end flow:
 
-## From Code to Cloud
+1. A FastAPI service is developed with health and prediction endpoints.
+2. The application is packaged as a Docker image.
+3. Terraform provisions Azure infrastructure (Resource Group, ACR, and AKS).
+4. Kubernetes deploys the app with replicas, a public Service, and autoscaling.
+5. Helm provides a parameterized deployment alternative.
+6. Prometheus and Grafana provide platform observability.
+7. GitHub Actions validates IaC and manifests before integration.
 
-1. **Application (FastAPI)**  
-   - `GET /health`: basic health check.  
-   - `POST /predict`: returns a mock “predicted” price for a given `symbol` (e.g., BTC, ETH).
+## Architecture
 
-2. **Containerization (Docker)**  
-   - A Docker image is built from the FastAPI app and pushed to a container registry (e.g., **Azure Container Registry / ACR**).
+![Architecture overview](./images/architecture_overview.png)
 
-3. **Infrastructure (Terraform)**  
-   - Creates the required cloud resources (e.g., **Resource Group**, **Container Registry**, **Kubernetes cluster**).
+## API and Functional Behavior
 
-4. **Orchestration (Kubernetes)**  
-   - A **Deployment** runs the Docker image as Pods in the cluster.  
-   - A **Service** of type `LoadBalancer` exposes the API on port **80** with a public IP.
+The API is implemented in `app/main.py` and exposes two endpoints:
 
----
+- `GET /health`
+  - health endpoint for Kubernetes probes, monitoring, and diagnostics.
+- `POST /predict?symbol=BTC`
+  - returns a simulated price for a market symbol.
 
-## Core Technology Stack
+Even though the project name suggests prediction, the current logic uses random values to keep the app simple and prioritize the DevOps architecture.
 
-- **FastAPI (Python)** — REST API service.
-- **Uvicorn** — ASGI server to run the FastAPI app.
-- **Docker** — containerization for reproducible builds and portable execution.
-- **Terraform** — Infrastructure as Code to provision cloud resources.
-- **Kubernetes (AKS)** — orchestration and deployment (Deployment + Service).
-- **Azure Container Registry (ACR)** — container image registry for storing and pulling images.
-- **kubectl + Azure CLI** — cluster access and deployment operations.
+## Technical Layers
 
----
+### 1) Application Layer
 
-## 4. Repository Structure
+- Framework: FastAPI.
+- ASGI server: Uvicorn.
+- Minimal dependencies defined in `app/requirements.txt`.
+- Simple and easy-to-audit codebase.
+
+### 2) Container Layer
+
+`app/Dockerfile` includes practical decisions:
+
+- lightweight Python base image,
+- dependency installation,
+- non-root runtime user,
+- internal API port exposure.
+
+These choices improve portability, basic security, and consistency across environments.
+
+### 3) Infrastructure Layer (Terraform)
+
+`infra/` defines Azure infrastructure:
+
+- `providers.tf`: `azurerm` provider.
+- `variables.tf`: project-level variables.
+- `main.tf`: Resource Group + Azure Container Registry.
+- `aks.tf`: AKS cluster.
+- `outputs.tf`: key outputs (resource names and ACR login server).
+- `backend.tf`: remote Terraform state in Azure Blob Storage.
+
+Remote state enables safer collaboration and avoids relying on a local `terraform.tfstate`.
+
+### 4) Kubernetes Layer (Raw Manifests)
+
+`k8s/` defines runtime behavior:
+
+- `deployment.yaml`: pods, resources, probes, and security context.
+- `service.yaml`: public exposure through LoadBalancer.
+- `hpa.yaml`: CPU-based horizontal autoscaling.
+
+This covers core production-style operation for an API service.
+
+### 5) Helm Layer (Parameterized Deployment)
+
+`helm/nn-predictor/` mirrors the same deployment model using templates:
+
+- centralized values in `values.yaml`,
+- templates for Deployment, Service, and HPA,
+- chart metadata in `Chart.yaml`.
+
+Helm allows environment-specific adjustments without editing raw manifests.
+
+### 6) Observability Layer
+
+`observability/` contains values for:
+
+- Prometheus (metrics collection),
+- Grafana (metrics visualization).
+
+The current profile is optimized for demo/lab usage (lightweight settings).
+
+### 7) Continuous Quality Layer (CI)
+
+`.github/workflows/terraform-checks.yml` defines quality gates:
+
+- Terraform validation (`fmt`, `validate`),
+- Kubernetes schema validation with `kubeconform`,
+- Helm lint/render/schema validation.
+
+The goal is early detection of issues before deployment.
+
+## Repository Structure
 
 ```text
-Azure Cloud Insfrastructure Kubernetes Docker Terraform/
-├── app/
-│   ├── Dockerfile        # Docker image for the FastAPI app
-│   ├── main.py           # FastAPI application (health + predict)
-│   └── requirements.txt  # Python dependencies
-│
-├── images/               # Architecture diagram and screenshots
-│   ├── architecture_overview.png       # High-level architecture (Terraform + ACR + AKS + FastAPI)
-│   ├── resources_created.png           # Terraform apply output (resources created)
-│   ├── azure_rg_overview.png           # Azure Resource Group overview (AKS + ACR)
-│   ├── docker_images.png               # Docker Desktop: local + ACR-tagged images
-│   ├── acr_repo_nn_predictor.png       # Azure Container Registry repo for nn-predictor
-│   ├── aks_deployment_nn_predictor.png # AKS deployment with running pod
-│   ├── fastapi_docs_health.png         # FastAPI docs – /health endpoint
-│   └── fastapi_docs_predict.png        # FastAPI docs – /predict endpoint
-│
-├── infra/
-│   ├── main.tf           # Resource Group + Azure Container Registry
-│   ├── aks.tf            # Azure Kubernetes Service (AKS) cluster
-│   ├── providers.tf      # Terraform provider configuration
-│   ├── variables.tf      # Common variables (project_name, location)
-│   └── outputs.tf        # Key outputs (RG, ACR login server, AKS name)
-│
-├── k8s/
-│   ├── deployment.yaml   # Kubernetes Deployment (Pods and container config)
-│   └── service.yaml      # Kubernetes Service (LoadBalancer, public IP)
-│
-├── .gitignore            # Ignore Python, Terraform and editor-specific files
-└── README.md             # Project overview, architecture and documentation
+app/                # FastAPI app + Dockerfile
+infra/              # Terraform (backend, provider, RG, ACR, AKS)
+k8s/                # Kubernetes manifests (Deployment, Service, HPA)
+helm/nn-predictor/  # Service Helm chart
+observability/      # Prometheus and Grafana values
+.github/workflows/  # CI validation pipeline
+images/             # Project screenshots and architecture diagram
 ```
+
+## Relevant Security Decisions
+
+The project includes practical baseline security controls:
+
+- container runs as non-root user,
+- restricted pod/container privileges,
+- health probes for resilience,
+- resource requests/limits for capacity control.
+
+## Project Value
+
+This repository demonstrates the ability to:
+
+- design a coherent cloud-native architecture,
+- automate infrastructure with Terraform,
+- operate workloads in Kubernetes with solid practices,
+- implement a technical quality gate workflow before production.
 
 ## Screenshots
 
-### Terraform-managed infrastructure
 ![Terraform apply outputs](images/resources_created.png)
-![Azure resource group](images/resources_group_azure.png)
-
-### Docker image
-![Docker images](images/docker_images.png)
-
-### Azure Container Registry
-![ACR nn-predictor repository](images/repo_nn_predictor.png)
-
-### AKS deployment
 ![AKS deployment](images/aks_workload_nn_predictor_deploy.png)
-
-### FastAPI endpoints
-![FastAPI /health endpoint](images/status_health_ok.png)
-![FastAPI /predict endpoint](images/api_predict_web.png)
-
-## Contributing
-Contributions are welcome! Open an issue or pull request for suggestions, improvements, or fixes.
+![FastAPI health endpoint](images/status_health_ok.png)
 
 ## Author
+
 **Alexandre Vidal**  
 Email: alexvidaldepalol@gmail.com  
 [LinkedIn](https://www.linkedin.com/in/alexandre-vidal-de-palol-a18538155/)  
 [GitHub](https://github.com/alexvidi)
-
-**Project Repository:** [Azure-Cloud-Insfrastructure-Kubernetes-Docker-Terraform](https://github.com/alexvidi/Azure-Cloud-Insfrastructure-Kubernetes-Docker-Terraform)
-
----
