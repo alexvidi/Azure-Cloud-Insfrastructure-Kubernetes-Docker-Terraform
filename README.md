@@ -149,9 +149,38 @@ This repository demonstrates the ability to:
 
 ## Screenshots
 
-![Terraform apply outputs](images/resources_created.png)
-![AKS deployment](images/aks_workload_nn_predictor_deploy.png)
-![FastAPI health endpoint](images/status_health_ok.png)
+Key captures that illustrate the end-to-end flow, from IaC to observability.
+
+**Infrastructure (Terraform + Azure)**
+
+![Resources created](docs/screeenshots/01-infrastructure/azure-infrastructure-resources.png)
+![ACR registry](docs/screeenshots/01-infrastructure/azure-acr-registry-details.png)
+![AKS cluster](docs/screeenshots/01-infrastructure/azure-aks-cluster-details.png)
+
+**Kubernetes Deployment**
+
+![Cluster connection](docs/screeenshots/02-kubernetes/k8s-cluster-connection-nodes.png)
+![Deployed resources](docs/screeenshots/02-kubernetes/k8s-resources-overview.png)
+![LoadBalancer service](docs/screeenshots/02-kubernetes/k8s-service-loadbalancer-details.png)
+
+**Quality & CI/CD**
+
+![GitHub Actions checks](docs/screeenshots/03-cicd/github-actions-checks-success.png)
+
+**API in Production**
+
+![OpenAPI docs](docs/screeenshots/04-api/api-swagger-ui.png)
+![Health check](docs/screeenshots/04-api/api-health-check-endpoint.png)
+![Price prediction](docs/screeenshots/04-api/api-predict-endpoint.png)
+
+**Observability**
+
+![Prometheus targets](docs/screeenshots/05-monitoring/prometheus-target-health.png)
+![`up` metric](docs/screeenshots/05-monitoring/prometheus-up-metric-graph.png)
+![Cluster dashboard](docs/screeenshots/05-monitoring/grafana-cluster-dashboard.png)
+![Workloads by namespace](docs/screeenshots/05-monitoring/grafana-namespace-workload.png)
+![Azure Monitor for AKS](docs/screeenshots/05-monitoring/azure-monitor-aks-insights.png)
+
 
 ## Author
 
