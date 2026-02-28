@@ -33,7 +33,7 @@
       .cardText { font: 500 17px 'Segoe UI', Arial, sans-serif; fill: #475569; }
       .small { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #334155; }
       .chip { font: 700 12px 'Segoe UI', Arial, sans-serif; fill: #0F172A; }
-      .flowText { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #475569; }
+      .flowText { font: 600 15px 'Segoe UI', Arial, sans-serif; fill: #475569; }
       .flow { stroke: #64748B; stroke-width: 3; marker-end: url(#arrow); }
     </style>
 
@@ -171,6 +171,6 @@
   <line x1="380" y1="602" x2="470" y2="602" class="flow"/>
   <text x="396" y="584" class="flowText">provision</text>
   <line x1="900" y1="445" x2="980" y2="445" class="flow"/>
-  <rect x="908" y="404" width="176" height="26" rx="13" fill="#FFFFFF" stroke="#D7E2F0"/>
-  <text x="922" y="421" class="flowText">AKS pulls image from ACR</text>
+  <rect x="900" y="402" width="192" height="30" rx="15" fill="#FFFFFF" stroke="#D7E2F0"/>
+  <text x="907" y="421" class="flowText">AKS pulls image from ACR</text>
 </svg>
