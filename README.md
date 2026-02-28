@@ -7,7 +7,7 @@
 
 ## Project Summary
 
-This repository is a cloud and DevOps portfolio project focused on taking a small API from local code to a production-style environment on Azure.
+This repository is a cloud-native infrastructure and deployment project focused on taking a small API from local code to a production-style environment on Azure.
 
 The application itself is intentionally simple: a small FastAPI service with `/health`, `/predict`, and `/metrics`. The real goal of the project is to demonstrate platform engineering and cloud operations skills:
 
@@ -20,9 +20,9 @@ The application itself is intentionally simple: a small FastAPI service with `/h
 
 This is not a machine learning project. It is a cloud-native deployment project with a small API used as the workload.
 
-## Why I Built It
+## Design Goals
 
-I built this project to practice and demonstrate the skills that are commonly expected in junior to junior-mid Cloud Engineer and DevOps Engineer roles:
+The project is designed to demonstrate a clean end-to-end cloud delivery flow with a deliberately simple application workload.
 
 - Infrastructure as Code
 - Kubernetes operations
@@ -32,7 +32,7 @@ I built this project to practice and demonstrate the skills that are commonly ex
 - security baselines
 - observability
 
-The project scope is intentionally controlled. I removed features that were not justified by the current application, so the repository stays coherent and easy to defend in interviews.
+The scope is intentionally controlled. Features that were not justified by the current application were removed so the repository stays coherent and technically defensible.
 
 ## What the Project Demonstrates
 
@@ -285,7 +285,7 @@ Some things are intentionally not included:
 - no certificate automation,
 - no extra microservices.
 
-I made those choices on purpose to keep the repository coherent, realistic for my current level, and easy to explain clearly in interviews.
+These choices keep the repository coherent and focused on the technologies that are actually implemented.
 
 ## Repository Structure
 
@@ -365,16 +365,6 @@ The screenshots in [docs/screenshots](/c:/Users/alexv/Projects/Azure%20Cloud%20I
 ![Cluster dashboard](docs/screenshots/05-monitoring/grafana-cluster-dashboard.png)
 ![Workloads by namespace](docs/screenshots/05-monitoring/grafana-namespace-workload.png)
 ![Azure Monitor for AKS](docs/screenshots/05-monitoring/azure-monitor-aks-insights.png)
-
-## What I Would Explain in an Interview
-
-If I presented this project in an interview, I would focus on these points:
-
-1. I used a deliberately simple application so I could focus on cloud and platform engineering decisions.
-2. I provisioned Azure infrastructure with modular Terraform instead of doing it manually.
-3. I containerized the app and deployed it to AKS with Kubernetes primitives that solve real operational concerns.
-4. I added CI/CD, security scans, autoscaling, networking controls, and observability.
-5. I kept the project coherent by removing features that were not justified by the workload.
 
 ## Author
 
