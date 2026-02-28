@@ -5,60 +5,33 @@
 [![Kubernetes](https://img.shields.io/badge/Orchestration-Kubernetes-326CE5?logo=kubernetes)](https://kubernetes.io/)
 [![FastAPI](https://img.shields.io/badge/Framework-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 
-## Project Summary
+## Overview
 
-This repository is a cloud-native infrastructure and deployment project focused on taking a small API from local code to a production-style environment on Azure.
+This repository contains a cloud-native deployment project that takes a small FastAPI application from source code to a production-style runtime on Azure.
 
-The application itself is intentionally simple: a small FastAPI service with `/health`, `/predict`, and `/metrics`. The real goal of the project is to demonstrate platform engineering and cloud operations skills:
+The application itself is intentionally simple. The focus of the repository is the delivery platform around it:
 
-- provisioning Azure infrastructure with Terraform,
-- packaging the app with Docker,
-- running it on AKS with Kubernetes,
-- exposing it through Ingress,
-- validating and deploying it with GitHub Actions,
-- and observing it with Prometheus and Grafana.
+- Azure infrastructure provisioned with Terraform
+- Docker image build and publish to Azure Container Registry
+- application runtime on Azure Kubernetes Service
+- Kubernetes deployment with Ingress, autoscaling, network restrictions, and disruption controls
+- CI/CD validation and deployment with GitHub Actions
+- Prometheus metrics and Grafana dashboards
 
-This is not a machine learning project. It is a cloud-native deployment project with a small API used as the workload.
+The project is deliberately scoped to stay coherent. Features that were not justified by the current workload were left out so the repository reflects the technologies that are actually being used.
 
-## Design Goals
+## At a Glance
 
-The project is designed to demonstrate a clean end-to-end cloud delivery flow with a deliberately simple application workload.
-
-- Infrastructure as Code
-- Kubernetes operations
-- CI/CD automation
-- containerization
-- cloud networking
-- security baselines
-- observability
-
-The scope is intentionally controlled. Features that were not justified by the current application were removed so the repository stays coherent and technically defensible.
-
-## What the Project Demonstrates
-
-### Skills Demonstrated
-
-| Skill area | What is implemented in this repo |
+| Area | Implementation |
 | --- | --- |
-| Azure | Resource Group, VNet, ACR, AKS, Log Analytics |
-| Terraform | Modular IaC, remote state, role assignment, reusable modules |
-| Docker | Dockerized FastAPI app using a non-root runtime user |
+| Cloud | Azure Resource Group, VNet, ACR, AKS, Log Analytics |
+| IaC | Modular Terraform with remote state support |
+| Containerization | Dockerized FastAPI app running as non-root |
 | Kubernetes | Namespace, Deployment, Service, Ingress, HPA, NetworkPolicy, PDB |
-| Helm | Parameterized chart mirroring the raw Kubernetes model |
-| CI/CD | GitHub Actions for validation, image build, scan, push, and deploy |
-| Security | Pod Security Admission, container hardening, image scan, IaC scan |
+| Packaging | Raw manifests and a matching Helm chart |
+| CI/CD | GitHub Actions validate and deploy workflows |
+| Security | Pod Security Admission, container hardening, Trivy, Checkov |
 | Observability | Prometheus metrics and Grafana dashboard |
-
-### Delivery Flow
-
-1. The FastAPI app is developed in `app/`.
-2. Docker packages it into an image.
-3. GitHub Actions builds and scans the image.
-4. The image is pushed to Azure Container Registry.
-5. Terraform provisions Azure infrastructure.
-6. Kubernetes deploys the workload to AKS.
-7. An Ingress exposes the API through an Ingress Controller.
-8. Prometheus scrapes `/metrics` and Grafana visualizes the data.
 
 ## Architecture
 
@@ -104,12 +77,12 @@ Client
   -> /health or /predict response
 ```
 
-### CI/CD Flow
+### Delivery Flow
 
 ```text
 Push to master
-  -> GitHub Actions validate workflow
-  -> Build Docker image
+  -> GitHub Actions validation workflow
+  -> Docker build
   -> Trivy image scan
   -> Push image to ACR
   -> kubectl apply manifests to AKS
@@ -117,175 +90,31 @@ Push to master
   -> Wait for rollout completion
 ```
 
-## Current Stack
+## Key Technical Decisions
 
-- Cloud: Azure
-- Container registry: Azure Container Registry
-- Container orchestration: Azure Kubernetes Service
-- Infrastructure as Code: Terraform
-- Application packaging: Docker
-- Deployment model: Kubernetes manifests and Helm chart
-- CI/CD: GitHub Actions
-- Metrics: Prometheus
-- Dashboards: Grafana
+- **Simple application, real platform concerns**
+  The API is intentionally lightweight so the repository can focus on infrastructure, deployment, security, and operations.
 
-## Application
+- **Terraform modules instead of a flat root configuration**
+  Azure infrastructure is split into `network`, `registry`, `aks`, and `monitoring` modules to keep concerns separated and reusable.
 
-The API is implemented in [app/main.py](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/app/main.py).
+- **AKS with Azure CNI powered by Cilium**
+  The cluster networking model is aligned with the more current AKS direction for network policy and dataplane support.
 
-Endpoints:
+- **ClusterIP Service plus Ingress**
+  The application is no longer exposed directly with a `LoadBalancer` Service. The `Service` stays internal and traffic enters through an Ingress Controller.
 
-- `GET /health`
-  Used by Kubernetes probes and operational checks.
-- `POST /predict?symbol=BTC`
-  Returns a simulated price for a symbol.
-- `GET /metrics`
-  Exposed for Prometheus scraping.
+- **Baseline runtime hardening**
+  The Deployment runs as non-root, disables privilege escalation, drops Linux capabilities, and uses Pod Security Admission in `restricted` mode.
 
-The business logic is intentionally minimal. This keeps the focus on cloud infrastructure, delivery, and operations rather than on application complexity.
+- **Restrictive network posture**
+  The application `NetworkPolicy` allows ingress only on the application port and denies all egress, because the current API does not require outbound network access.
 
-## Infrastructure
+- **Availability controls**
+  The project includes an HPA for CPU-based scaling and a PDB to avoid all replicas being voluntarily disrupted at once.
 
-Terraform is organized by modules under [infra/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/infra):
-
-- `network`
-  Creates the VNet and AKS subnet.
-- `registry`
-  Creates ACR.
-- `aks`
-  Creates AKS with Azure CNI powered by Cilium, RBAC, and authorized API access ranges.
-- `monitoring`
-  Creates Log Analytics and monitoring-related resources.
-
-The composition happens in [infra/main.tf](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/infra/main.tf), and AKS receives `AcrPull` permissions so the cluster can pull images from ACR.
-
-### Why the infrastructure layout matters
-
-This structure shows that I can:
-
-- split Terraform by concern instead of keeping a monolithic file,
-- use remote state,
-- wire modules together cleanly,
-- and keep Azure infrastructure understandable and maintainable.
-
-## Kubernetes Design
-
-The raw manifests live in [k8s/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s).
-
-### Resources included
-
-- [namespace.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/namespace.yaml)
-  Dedicated namespace with Pod Security Admission in `restricted` mode.
-- [deployment.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/deployment.yaml)
-  Defines replicas, probes, resources, image, and container hardening.
-- [service.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/service.yaml)
-  Internal `ClusterIP` service used by the Ingress.
-- [ingress.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/ingress.yaml)
-  Exposes the API through an Ingress Controller.
-- [hpa.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/hpa.yaml)
-  Scales the deployment based on CPU utilization.
-- [networkpolicy.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/networkpolicy.yaml)
-  Allows ingress only on the app port and denies all egress.
-- [pdb.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/pdb.yaml)
-  Keeps at least one pod available during voluntary disruptions.
-
-### Why these manifests matter
-
-They show that I understand more than just "run a container in Kubernetes". The repo includes:
-
-- workload definition,
-- internal service discovery,
-- external traffic entry,
-- autoscaling,
-- network restrictions,
-- availability controls,
-- and basic runtime hardening.
-
-## Helm
-
-The chart in [helm/nn-predictor/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/helm/nn-predictor) mirrors the raw manifest model and provides a parameterized deployment path.
-
-This demonstrates that I understand both:
-
-- raw Kubernetes manifests,
-- and a reusable packaging model with Helm.
-
-## CI/CD
-
-### Validation Workflow
-
-[.github/workflows/validate.yml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/.github/workflows/validate.yml) runs:
-
-- `ruff`
-- `pytest`
-- `bandit`
-- `pip-audit`
-- `terraform fmt` and `terraform validate`
-- `checkov`
-- optional `infracost`
-- `kubeconform`
-- `helm lint`
-
-### Deploy Workflow
-
-[.github/workflows/deploy.yml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/.github/workflows/deploy.yml) does the following:
-
-- logs into Azure with OIDC,
-- builds the Docker image,
-- scans it with Trivy,
-- pushes it to ACR,
-- applies the Kubernetes manifests,
-- updates the Deployment to the current commit SHA,
-- waits for rollout completion.
-
-### Why this matters
-
-This shows practical CI/CD, not just local deployment. It demonstrates:
-
-- build automation,
-- image security scanning,
-- cloud authentication with OIDC,
-- and Kubernetes rollout orchestration.
-
-## Security Decisions
-
-The project includes baseline security controls that are justified by the current application:
-
-- the container runs as a non-root user,
-- pod and container `securityContext` are applied,
-- Pod Security Admission is enabled at namespace level,
-- `allowPrivilegeEscalation` is disabled,
-- Linux capabilities are dropped,
-- resource requests and limits are defined,
-- egress is denied by default in the app `NetworkPolicy`,
-- image pull uses AKS managed identity plus `AcrPull`,
-- the image is scanned in CI with Trivy,
-- the Terraform is scanned with Checkov.
-
-I intentionally removed pieces that were not justified by the current app, such as extra secret-management runtime layers that the API did not actually need.
-
-## Observability
-
-The project includes metrics and dashboards:
-
-- the FastAPI app exposes Prometheus metrics at `/metrics`,
-- Prometheus scrapes the app,
-- Grafana dashboards visualize runtime behavior,
-- a sample API dashboard is provided in [observability/grafana-fastapi-metrics.json](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability/grafana-fastapi-metrics.json).
-
-This gives the project a basic but real observability layer instead of stopping at deployment only.
-
-## Scope Decisions
-
-Some things are intentionally not included:
-
-- no database,
-- no GitOps controller,
-- no distributed tracing stack,
-- no certificate automation,
-- no extra microservices.
-
-These choices keep the repository coherent and focused on the technologies that are actually implemented.
+- **No unnecessary platform features**
+  GitOps controllers, certificate automation, databases, and tracing were intentionally left out to keep the repository focused and technically consistent.
 
 ## Repository Structure
 
@@ -299,16 +128,144 @@ observability/      Prometheus, Grafana, sample dashboard
 docs/screenshots/   Project screenshots
 ```
 
-## How to Run It
+## Main Components
 
-### 1. Build and push the image
+### Application
+
+The API is implemented in [app/main.py](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/app/main.py).
+
+Endpoints:
+
+- `GET /health`
+  Used by Kubernetes probes and operational checks.
+- `POST /predict?symbol=BTC`
+  Returns a simulated price for a symbol.
+- `GET /metrics`
+  Exposed for Prometheus scraping.
+
+The business logic is intentionally minimal so the repository emphasizes cloud delivery and runtime operations rather than application complexity.
+
+### Infrastructure
+
+Terraform lives under [infra/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/infra).
+
+Main modules:
+
+- `network`
+  Creates the VNet and AKS subnet.
+- `registry`
+  Creates Azure Container Registry.
+- `aks`
+  Creates AKS with RBAC, authorized API access ranges, and Azure CNI powered by Cilium.
+- `monitoring`
+  Creates Log Analytics and monitoring-related resources.
+
+The composition happens in [infra/main.tf](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/infra/main.tf), and AKS receives the `AcrPull` role assignment so the cluster can pull images from ACR.
+
+### Kubernetes
+
+Raw manifests live in [k8s/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s).
+
+Included resources:
+
+- [namespace.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/namespace.yaml)
+- [deployment.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/deployment.yaml)
+- [service.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/service.yaml)
+- [ingress.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/ingress.yaml)
+- [hpa.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/hpa.yaml)
+- [networkpolicy.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/networkpolicy.yaml)
+- [pdb.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/pdb.yaml)
+
+Together, these manifests cover workload definition, service routing, external entry, scaling, network restriction, and disruption handling.
+
+### Helm
+
+The chart in [helm/nn-predictor/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/helm/nn-predictor) mirrors the raw manifest model and provides a parameterized deployment path.
+
+This keeps both deployment styles aligned:
+
+- raw manifests for direct Kubernetes understanding
+- Helm for reusable, configurable packaging
+
+### CI/CD
+
+#### Validation Workflow
+
+[.github/workflows/validate.yml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/.github/workflows/validate.yml) runs:
+
+- `ruff`
+- `pytest`
+- `bandit`
+- `pip-audit`
+- `terraform fmt`
+- `terraform validate`
+- `checkov`
+- optional `infracost`
+- `kubeconform`
+- `helm lint`
+
+#### Deploy Workflow
+
+[.github/workflows/deploy.yml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/.github/workflows/deploy.yml) performs:
+
+- Azure login with OIDC
+- Docker image build
+- Trivy image scan
+- push to ACR
+- namespace creation
+- manifest apply
+- Deployment image update to the current commit SHA
+- rollout status verification
+
+### Observability
+
+The application exposes Prometheus metrics at `/metrics`.
+
+Observability assets live in [observability/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability):
+
+- Prometheus values
+- Grafana values
+- sample API dashboard in [grafana-fastapi-metrics.json](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability/grafana-fastapi-metrics.json)
+
+This gives the repository a basic but real monitoring layer instead of stopping at deployment only.
+
+## Security Posture
+
+The repository includes baseline controls that are justified by the current workload:
+
+- non-root container runtime
+- pod and container `securityContext`
+- Pod Security Admission in `restricted` mode
+- `allowPrivilegeEscalation: false`
+- dropped Linux capabilities
+- resource requests and limits
+- `NetworkPolicy` with denied egress by default
+- AKS managed identity plus `AcrPull` for image pulls
+- Trivy image scanning in CI
+- Checkov scanning for Terraform
+
+## Scope Boundaries
+
+The following are intentionally not included:
+
+- database layer
+- GitOps controller
+- distributed tracing stack
+- certificate automation
+- extra microservices
+
+These omissions are deliberate. The goal is to keep the repository aligned with the actual workload and avoid adding platform layers that are not currently required by the project.
+
+## How to Run
+
+### 1. Build and Push the Image
 
 ```bash
 docker build -t <acr>.azurecr.io/fastapi-predictor:v1 app
 docker push <acr>.azurecr.io/fastapi-predictor:v1
 ```
 
-### 2. Provision Azure infrastructure
+### 2. Provision Azure Infrastructure
 
 ```bash
 cd infra
@@ -326,15 +283,15 @@ kubectl apply -f k8s/
 
 Prerequisite:
 
-- an Ingress Controller such as `ingress-nginx` must already exist in the cluster.
+- an Ingress Controller such as `ingress-nginx` must already exist in the cluster
 
-### 4. Access the app
+### 4. Access the Application
 
 After the Ingress is active and the host points to the controller, the API is reachable through the configured Ingress host.
 
 ## Screenshots
 
-The screenshots in [docs/screenshots](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/docs/screenshots) document the end-to-end flow from Azure provisioning to Kubernetes runtime and monitoring.
+The screenshots in [docs/screenshots](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/docs/screenshots) document the project from Azure provisioning to Kubernetes runtime and monitoring.
 
 ### Infrastructure
 
