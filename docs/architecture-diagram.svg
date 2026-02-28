@@ -1,8 +1,22 @@
 <svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F8FAFC"/>
-      <stop offset="1" stop-color="#EEF4FF"/>
+      <stop stop-color="#FFFDF8"/>
+      <stop offset="1" stop-color="#F7F1E7"/>
+    </linearGradient>
+    <pattern id="techGrid" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#E9DED1" stroke-width="1"/>
+      <circle cx="24" cy="24" r="1.8" fill="#E6DACD"/>
+    </pattern>
+    <linearGradient id="bandTop" x1="0" y1="0" x2="1600" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2E4CF" stop-opacity="0"/>
+      <stop offset="0.45" stop-color="#F2E4CF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#F2E4CF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bandBottom" x1="0" y1="0" x2="1600" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8F0DE" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#E8F0DE" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#E8F0DE" stop-opacity="0"/>
     </linearGradient>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
       <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.10"/>
@@ -16,7 +30,7 @@
       .subtitle { font: 500 17px 'Segoe UI', Arial, sans-serif; fill: #475569; }
       .section { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #0F172A; }
       .cardTitle { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #0F172A; }
-      .cardText { font: 500 16px 'Segoe UI', Arial, sans-serif; fill: #475569; }
+      .cardText { font: 500 17px 'Segoe UI', Arial, sans-serif; fill: #475569; }
       .small { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #334155; }
       .chip { font: 700 12px 'Segoe UI', Arial, sans-serif; fill: #0F172A; }
       .flowText { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #475569; }
@@ -45,53 +59,58 @@
   </defs>
 
   <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#techGrid)" opacity="0.55"/>
+  <rect x="120" y="42" width="1360" height="148" rx="74" fill="url(#bandTop)" opacity="0.85"/>
+  <rect x="80" y="690" width="1440" height="150" rx="75" fill="url(#bandBottom)" opacity="0.8"/>
 
   <text x="80" y="86" class="title">Cloud-Native FastAPI on Azure</text>
   <text x="80" y="118" class="subtitle">Terraform + GitHub Actions + ACR + AKS + Ingress + Prometheus + Grafana</text>
 
-  <rect x="80" y="170" width="300" height="250" rx="28" fill="#FFFFFF" stroke="#D7E2F0" filter="url(#shadow)"/>
+  <rect x="80" y="170" width="300" height="250" rx="28" fill="#FFFFFF" stroke="#D0DBE8" stroke-width="1.4" filter="url(#shadow)"/>
   <circle cx="140" cy="240" r="34" fill="#F1F5F9"/>
   <g transform="translate(122 222) scale(1.5)">
     <use href="#logo-github"/>
   </g>
   <text x="190" y="235" class="cardTitle">GitHub Actions</text>
-  <text x="190" y="265" class="cardText">Validate, build, scan and deploy</text>
+  <text x="190" y="258" class="cardText">Validate, build</text>
+  <text x="190" y="280" class="cardText">and deploy</text>
   <rect x="112" y="308" width="72" height="28" rx="14" fill="#E2E8F0"/><text x="128" y="327" class="chip">Validate</text>
   <rect x="194" y="308" width="64" height="28" rx="14" fill="#DBEAFE"/><text x="213" y="327" class="chip">Build</text>
   <rect x="268" y="308" width="64" height="28" rx="14" fill="#FEE2E2"/><text x="287" y="327" class="chip">Trivy</text>
   <rect x="112" y="348" width="96" height="28" rx="14" fill="#DCFCE7"/><text x="136" y="367" class="chip">Rollout</text>
   <rect x="218" y="348" width="114" height="28" rx="14" fill="#E0F2FE"/><text x="240" y="367" class="chip">Push to ACR</text>
 
-  <rect x="80" y="470" width="300" height="180" rx="28" fill="#FFFFFF" stroke="#D7E2F0" filter="url(#shadow)"/>
+  <rect x="80" y="470" width="300" height="180" rx="28" fill="#FFFFFF" stroke="#D8CDEB" stroke-width="1.4" filter="url(#shadow)"/>
   <circle cx="140" cy="540" r="34" fill="#F3E8FF"/>
   <g transform="translate(122 522) scale(1.5)">
     <use href="#logo-terraform"/>
   </g>
-  <text x="190" y="539" class="cardTitle">Terraform</text>
-  <text x="190" y="572" class="cardText">Modules provision Azure</text>
-  <text x="190" y="594" class="cardText">infrastructure</text>
-  <text x="112" y="622" class="small">Resource Group, network, ACR, AKS and monitoring</text>
+  <text x="184" y="539" class="cardTitle">Terraform</text>
+  <text x="184" y="572" class="cardText">Modules provision Azure</text>
+  <text x="184" y="594" class="cardText">infrastructure</text>
+  <text x="112" y="616" class="small">Resource Group, network, ACR, AKS</text>
+  <text x="112" y="636" class="small">and monitoring</text>
 
-  <rect x="470" y="170" width="430" height="480" rx="32" fill="#FFFFFF" stroke="#CFE3FF" filter="url(#shadow)"/>
+  <rect x="470" y="170" width="430" height="480" rx="32" fill="#FFFFFF" stroke="#C7D9EF" stroke-width="1.4" filter="url(#shadow)"/>
   <circle cx="542" cy="242" r="38" fill="#E0F2FE"/>
   <g transform="translate(520 220) scale(1.85)">
     <use href="#logo-azure"/>
   </g>
   <text x="600" y="235" class="cardTitle">Azure Platform</text>
-  <text x="588" y="266" class="cardText">Terraform provisions the Azure platform</text>
-  <text x="588" y="290" class="cardText">used by CI/CD and the running workload</text>
+  <text x="600" y="266" class="cardText">Terraform-managed Azure services</text>
+  <text x="600" y="290" class="cardText">for delivery and runtime</text>
 
   <rect x="520" y="310" width="155" height="82" rx="22" fill="#EFF6FF" stroke="#BFDBFE"/>
   <text x="553" y="345" class="section">Network</text>
-  <text x="566" y="370" class="cardText">VNet / Subnet</text>
+  <text x="553" y="370" class="cardText">VNet / Subnet</text>
 
   <rect x="695" y="310" width="155" height="82" rx="22" fill="#EFF6FF" stroke="#BFDBFE"/>
-  <text x="745" y="345" class="section">Registry</text>
+  <text x="732" y="345" class="section">Registry</text>
   <text x="752" y="370" class="cardText">ACR</text>
 
   <rect x="520" y="414" width="155" height="82" rx="22" fill="#EFF6FF" stroke="#BFDBFE"/>
-  <text x="551" y="449" class="section">AKS</text>
-  <text x="544" y="474" class="cardText">Managed cluster</text>
+  <text x="540" y="449" class="section">AKS</text>
+  <text x="533" y="474" class="cardText">Managed cluster</text>
 
   <rect x="695" y="414" width="155" height="82" rx="22" fill="#EFF6FF" stroke="#BFDBFE"/>
   <text x="712" y="449" class="section">Monitoring</text>
@@ -102,8 +121,8 @@
   <rect x="714" y="540" width="128" height="32" rx="16" fill="#E2E8F0"/>
   <text x="738" y="561" class="chip">AcrPull + RBAC</text>
 
-  <rect x="980" y="170" width="540" height="480" rx="32" fill="#FFFFFF" stroke="#CBE6FF" filter="url(#shadow)"/>
-  <circle cx="1052" cy="242" r="38" fill="#DBEAFE"/>
+  <rect x="980" y="170" width="540" height="480" rx="32" fill="#FFFFFF" stroke="#C4DDED" stroke-width="1.4" filter="url(#shadow)"/>
+  <circle cx="1052" cy="242" r="38" fill="#FEE2E2"/>
   <g transform="translate(1029 219) scale(1.9)">
     <use href="#logo-kubernetes"/>
   </g>
@@ -112,7 +131,7 @@
   <text x="1110" y="290" class="cardText">with scaling and runtime safeguards</text>
 
   <rect x="1030" y="315" width="146" height="36" rx="18" fill="#E2E8F0"/>
-  <text x="1063" y="338" class="chip">Ingress Controller</text>
+  <text x="1056" y="338" class="chip">Ingress Controller</text>
   <rect x="1190" y="315" width="100" height="36" rx="18" fill="#E0F2FE"/>
   <text x="1221" y="338" class="chip">Ingress</text>
   <rect x="1304" y="315" width="142" height="36" rx="18" fill="#E2E8F0"/>
@@ -123,24 +142,24 @@
   <rect x="1088" y="410" width="324" height="120" rx="26" fill="#DBEAFE" stroke="#93C5FD"/>
   <text x="1180" y="455" class="cardTitle">FastAPI Pods</text>
   <text x="1140" y="486" class="cardText">readiness and liveness probes</text>
-  <text x="1108" y="512" class="cardText">limits, requests and non-root hardening</text>
+  <text x="1098" y="512" class="cardText">limits, requests and non-root hardening</text>
   <line x1="1375" y1="351" x2="1250" y2="410" class="flow"/>
 
   <rect x="1095" y="560" width="68" height="30" rx="15" fill="#E2E8F0"/><text x="1120" y="580" class="chip">HPA</text>
   <rect x="1178" y="560" width="78" height="30" rx="15" fill="#E2E8F0"/><text x="1205" y="580" class="chip">PDB</text>
-  <rect x="1271" y="560" width="106" height="30" rx="15" fill="#E2E8F0"/><text x="1294" y="580" class="chip">NetworkPolicy</text>
+  <rect x="1271" y="560" width="106" height="30" rx="15" fill="#E2E8F0"/><text x="1287" y="580" class="chip">NetworkPolicy</text>
 
-  <rect x="980" y="700" width="540" height="150" rx="32" fill="#FFFFFF" stroke="#CFEEDB" filter="url(#shadow)"/>
-  <text x="1020" y="745" class="section">Observability</text>
-  <text x="1020" y="772" class="cardText">Prometheus scrapes application metrics and Grafana visualizes them</text>
+  <rect x="980" y="700" width="540" height="150" rx="32" fill="#FFFFFF" stroke="#CBE1D2" stroke-width="1.4" filter="url(#shadow)"/>
+  <text x="1185" y="745" class="section">Observability</text>
+  <text x="982" y="772" class="cardText">Prometheus scrapes application metrics and Grafana visualizes them</text>
 
-  <circle cx="1110" cy="810" r="26" fill="#FFF7ED"/>
+  <circle cx="1110" cy="810" r="26" fill="#DCFCE7"/>
   <g transform="translate(1095 795) scale(1.25)">
     <use href="#logo-prometheus"/>
   </g>
   <text x="1148" y="816" class="cardTitle">Prometheus</text>
 
-  <circle cx="1322" cy="810" r="26" fill="#FFF7ED"/>
+  <circle cx="1322" cy="810" r="26" fill="#DCFCE7"/>
   <g transform="translate(1307 795) scale(1.25)">
     <use href="#logo-grafana"/>
   </g>
@@ -150,7 +169,7 @@
   <line x1="380" y1="308" x2="470" y2="308" class="flow"/>
   <text x="392" y="285" class="flowText">image pipeline</text>
   <line x1="380" y1="602" x2="470" y2="602" class="flow"/>
-  <text x="396" y="571" class="flowText">provision</text>
+  <text x="396" y="584" class="flowText">provision</text>
   <line x1="900" y1="445" x2="980" y2="445" class="flow"/>
   <rect x="908" y="404" width="176" height="26" rx="13" fill="#FFFFFF" stroke="#D7E2F0"/>
   <text x="922" y="421" class="flowText">AKS pulls image from ACR</text>
