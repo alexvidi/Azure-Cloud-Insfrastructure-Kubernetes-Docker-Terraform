@@ -37,34 +37,7 @@ The project is deliberately scoped to stay coherent. Features that were not just
 
 ### High-Level Architecture
 
-```mermaid
-flowchart LR
-    Dev[Developer / Git Push]
-    GH[GitHub Actions]
-    App[FastAPI App]
-    Img[Docker Image]
-    ACR[Azure Container Registry]
-    TF[Terraform]
-    Azure[Azure Infrastructure]
-    AKS[AKS Cluster]
-    IngressCtrl[Ingress Controller]
-    Ingress[Ingress]
-    Svc[ClusterIP Service]
-    Pods[FastAPI Pods]
-    Prom[Prometheus]
-    Grafana[Grafana]
-
-    Dev --> GH
-    App --> Img
-    GH --> Img
-    Img --> ACR
-    TF --> Azure
-    Azure --> AKS
-    GH --> AKS
-    ACR --> AKS
-    AKS --> IngressCtrl --> Ingress --> Svc --> Pods
-    Pods --> Prom --> Grafana
-```
+![Architecture diagram](docs/architecture-diagram.svg)
 
 ### Runtime Request Flow
 
