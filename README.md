@@ -244,18 +244,6 @@ The repository includes baseline controls that are justified by the current work
 - Trivy image scanning in CI
 - Checkov scanning for Terraform
 
-## Scope Boundaries
-
-The following are intentionally not included:
-
-- database layer
-- GitOps controller
-- distributed tracing stack
-- certificate automation
-- extra microservices
-
-These omissions are deliberate. The goal is to keep the repository aligned with the actual workload and avoid adding platform layers that are not currently required by the project.
-
 ## How to Run
 
 ### 1. Build and Push the Image
