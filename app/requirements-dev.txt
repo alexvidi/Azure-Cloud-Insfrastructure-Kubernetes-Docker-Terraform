@@ -1,6 +1,6 @@
 # Development and test dependencies for local validation and CI.
 -r requirements.txt
 
-# FastAPI 0.109 / Starlette TestClient is compatible with httpx 0.27.x.
+# Test client dependency for FastAPI/Starlette integration tests.
 pytest
-httpx<0.28
+httpx>=0.28,<0.29
