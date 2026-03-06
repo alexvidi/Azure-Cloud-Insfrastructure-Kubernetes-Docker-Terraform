@@ -71,14 +71,23 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+        with:
+          version: v0.69.3
+          cache: true
+
       - name: Scan Image with Trivy
         uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           severity: HIGH,CRITICAL
+          vuln-type: os,library
+          exit-code: "1"
           format: sarif
           output: trivy.sarif
           ignore-unfixed: true
+          skip-setup-trivy: true
 
       - name: Upload Trivy Report
         uses: github/codeql-action/upload-sarif@v3
