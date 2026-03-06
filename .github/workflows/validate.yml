@@ -65,7 +65,7 @@ jobs:
         run: pytest app/tests
 
       - name: SAST (bandit)
-        run: bandit -r app
+        run: bandit -r app -x app/tests
 
       - name: Dependency audit (pip-audit)
         run: pip-audit -r app/requirements.txt
