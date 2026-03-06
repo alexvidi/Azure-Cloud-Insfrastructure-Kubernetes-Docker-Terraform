@@ -7,6 +7,7 @@ __pycache__/
 # Local virtual environments
 .env
 .venv
+.venv-wsl/
 venv/
 env/
 
@@ -36,4 +37,7 @@ crash.*.log
 
 # Terraform plan output
 infra/tfplan
+
+# Temporary local auth/bootstrap files
+github-oidc-credential.json
 

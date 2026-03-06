@@ -7,7 +7,7 @@
 
 ## Overview
 
-This repository contains a cloud-native deployment project that takes a small FastAPI application from source code to a production-style runtime on Azure.
+This repository contains a cloud-native deployment project that takes a small FastAPI market quote service from source code to a production-style runtime on Azure.
 
 The application itself is intentionally simple. The focus of the repository is the delivery platform around it:
 
@@ -27,11 +27,11 @@ The project is deliberately scoped to stay coherent. Features that were not just
 | Cloud | Azure Resource Group, VNet, ACR, AKS, Log Analytics |
 | IaC | Modular Terraform with remote state support |
 | Containerization | Dockerized FastAPI app running as non-root |
-| Kubernetes | Namespace, Deployment, Service, Ingress, HPA, NetworkPolicy, PDB |
-| Packaging | Raw manifests and a matching Helm chart |
+| Kubernetes | Namespace, Deployment, Service, Ingress, HPA, NetworkPolicy, PDB, raw monitoring manifests |
+| Packaging | Raw Kubernetes manifests |
 | CI/CD | GitHub Actions validate and deploy workflows |
 | Security | Pod Security Admission, container hardening, Trivy, Checkov |
-| Observability | Prometheus metrics and Grafana dashboard |
+| Observability | Prometheus + Grafana via raw Kubernetes manifests |
 
 ## Architecture
 
@@ -47,20 +47,24 @@ Client
   -> Ingress
   -> ClusterIP Service
   -> FastAPI Pod
-  -> /health or /predict response
+  -> /health or /quote response
 ```
 
 ### Delivery Flow
 
 ```text
 Push to master
-  -> GitHub Actions validation workflow
+  -> GitHub Actions Validate workflow
+  -> GitHub Actions Deploy workflow
+
+Deploy workflow
   -> Docker build
   -> Trivy image scan
   -> Push image to ACR
   -> kubectl apply manifests to AKS
   -> Update Deployment image to commit SHA
   -> Wait for rollout completion
+  -> Smoke test /health and /quote
 ```
 
 ## Key Technical Decisions
@@ -95,7 +99,6 @@ Push to master
 app/                FastAPI application and Dockerfile
 infra/              Terraform root and modules
 k8s/                Raw Kubernetes manifests
-helm/nn-predictor/  Helm chart mirroring the runtime model
 observability/      Prometheus, Grafana, sample dashboard
 .github/workflows/  Validation and deployment pipelines
 docs/screenshots/   Project screenshots
@@ -111,12 +114,12 @@ Endpoints:
 
 - `GET /health`
   Used by Kubernetes probes and operational checks.
-- `POST /predict?symbol=BTC`
-  Returns a simulated price for a symbol.
+- `GET /quote?symbol=BTC`
+  Returns a synthetic market quote for a supported symbol.
 - `GET /metrics`
   Exposed for Prometheus scraping.
 
-The business logic is intentionally minimal so the repository emphasizes cloud delivery and runtime operations rather than application complexity.
+The business logic is intentionally lightweight and honest. Instead of pretending to be a real machine learning system, the API returns synthetic quotes for a small supported symbol set so the repository can emphasize cloud delivery and runtime operations.
 
 ### Infrastructure
 
@@ -148,17 +151,13 @@ Included resources:
 - [hpa.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/hpa.yaml)
 - [networkpolicy.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/networkpolicy.yaml)
 - [pdb.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/pdb.yaml)
+- [monitoring-namespace.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/monitoring-namespace.yaml)
+- [prometheus-config.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/prometheus-config.yaml)
+- [prometheus.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/prometheus.yaml)
+- [grafana-config.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/grafana-config.yaml)
+- [grafana.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/grafana.yaml)
 
-Together, these manifests cover workload definition, service routing, external entry, scaling, network restriction, and disruption handling.
-
-### Helm
-
-The chart in [helm/nn-predictor/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/helm/nn-predictor) mirrors the raw manifest model and provides a parameterized deployment path.
-
-This keeps both deployment styles aligned:
-
-- raw manifests for direct Kubernetes understanding
-- Helm for reusable, configurable packaging
+Together, these manifests cover workload definition, service routing, external entry, scaling, network restriction, disruption handling, and a lightweight monitoring stack.
 
 ### CI/CD
 
@@ -173,9 +172,13 @@ This keeps both deployment styles aligned:
 - `terraform fmt`
 - `terraform validate`
 - `checkov`
-- optional `infracost`
 - `kubeconform`
-- `helm lint`
+
+Note:
+
+- `Validate` and `Deploy` are separate workflows in this repository
+- a push to `master` can trigger both workflows independently
+- the deploy workflow is not currently blocked by validate workflow completion
 
 #### Deploy Workflow
 
@@ -189,16 +192,23 @@ This keeps both deployment styles aligned:
 - manifest apply
 - Deployment image update to the current commit SHA
 - rollout status verification
+- post-deploy smoke test against `/health` and `/quote` on the Kubernetes Service
+- failure diagnostics with `kubectl get`, `describe`, and application logs
+
+Note:
+
+- the Deployment manifest keeps a default image reference for direct `kubectl apply` usage
+- the GitHub Actions deploy workflow overrides that image with the current commit SHA during CI/CD
 
 ### Observability
 
 The application exposes Prometheus metrics at `/metrics`.
 
-Observability assets live in [observability/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability):
+The monitoring stack is deployed with raw manifests in [k8s/monitoring-namespace.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/monitoring-namespace.yaml), [k8s/prometheus-config.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/prometheus-config.yaml), [k8s/prometheus.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/prometheus.yaml), [k8s/grafana-config.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/grafana-config.yaml), and [k8s/grafana.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/grafana.yaml).
 
-- Prometheus values
-- Grafana values
-- sample API dashboard in [grafana-fastapi-metrics.json](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability/grafana-fastapi-metrics.json)
+Supporting observability assets remain in [observability/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability):
+
+- source dashboard in [grafana-fastapi-metrics.json](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability/grafana-fastapi-metrics.json)
 
 This gives the repository a basic but real monitoring layer instead of stopping at deployment only.
 
@@ -222,8 +232,8 @@ The repository includes baseline controls that are justified by the current work
 ### 1. Build and Push the Image
 
 ```bash
-docker build -t <acr>.azurecr.io/fastapi-predictor:v1 app
-docker push <acr>.azurecr.io/fastapi-predictor:v1
+docker build -t <acr>.azurecr.io/market-quote-api:v1 app
+docker push <acr>.azurecr.io/market-quote-api:v1
 ```
 
 ### 2. Provision Azure Infrastructure
@@ -245,10 +255,34 @@ kubectl apply -f k8s/
 Prerequisite:
 
 - an Ingress Controller such as `ingress-nginx` must already exist in the cluster
+- direct `kubectl apply` uses the default image reference defined in `k8s/deployment.yaml`
+- the CI/CD workflow updates that image to the current commit SHA after applying the manifests
+- the raw monitoring stack is included in the `k8s/monitoring-*.yaml`, `k8s/prometheus*.yaml`, and `k8s/grafana*.yaml` manifests and deploys into the `monitoring` namespace
 
 ### 4. Access the Application
 
 After the Ingress is active and the host points to the controller, the API is reachable through the configured Ingress host.
+
+### 5. Access Observability
+
+Prometheus and Grafana are deployed into the `monitoring` namespace by the raw monitoring manifests under `k8s/`.
+
+To access them locally:
+
+```bash
+kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
+kubectl port-forward -n monitoring svc/grafana 3000:3000
+```
+
+Then open:
+
+- `http://127.0.0.1:9090` for Prometheus
+- `http://127.0.0.1:3000` for Grafana
+
+Grafana demo credentials:
+
+- username: `admin`
+- password: `admin`
 
 ## Screenshots
 
@@ -274,7 +308,7 @@ The screenshots in [docs/screenshots](/c:/Users/alexv/Projects/Azure%20Cloud%20I
 
 ![OpenAPI docs](docs/screenshots/04-api/api-swagger-ui.png)
 ![Health check](docs/screenshots/04-api/api-health-check-endpoint.png)
-![Price prediction](docs/screenshots/04-api/api-predict-endpoint.png)
+![Synthetic quote response](docs/screenshots/04-api/api-quote-endpoint.png)
 
 ### Observability
 

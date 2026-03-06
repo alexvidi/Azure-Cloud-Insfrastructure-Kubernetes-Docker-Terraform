@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Kubernetes Deployment for the NN Predictor API
+# Kubernetes Deployment for the Market Quote API
 # -----------------------------------------------------------------------------
 # Ensures that a Pod with our Docker image is always running.
 # -----------------------------------------------------------------------------
@@ -9,7 +9,8 @@ kind: Deployment
 
 metadata:
   # Name of the Deployment in the cluster.
-  name: nn-predictor-deploy
+  name: market-quote-api
+  namespace: market-quote
 
 spec:
   # Number of replicas (Pods) to run.
@@ -18,7 +19,7 @@ spec:
   # The Deployment manages Pods that match this label selector.
   selector:
     matchLabels:
-      app: nn-predictor-app
+      app: market-quote-api
 
   # Pod template: defines how the Pods should look.
   template:
@@ -26,10 +27,9 @@ spec:
       # Labels that will be attached to the Pods.
       # The Service will use the same label to route traffic.
       labels:
-        app: nn-predictor-app
+        app: market-quote-api
 
     spec:
-    
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -38,10 +38,12 @@ spec:
           type: RuntimeDefault
 
       containers:
-        - name: nn-predictor-container
+        - name: market-quote-container
 
           # Docker image stored in Azure Container Registry.
-          image: alexdevops99acr.azurecr.io/fastapi-predictor:v1
+          # This default value supports direct kubectl-based deployments.
+          # The GitHub Actions deploy workflow overrides it with the current commit SHA.
+          image: alexdevops99acr.azurecr.io/market-quote-api:v1
 
           # Internal port exposed by the container (Uvicorn listens here).
           ports:
@@ -79,4 +81,3 @@ spec:
             capabilities:
               drop:
                 - ALL
-

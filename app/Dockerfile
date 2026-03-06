@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Dockerfile for the NN Predictor API
+# Dockerfile for the Market Quote API
 #
 # Goal:
 # - Build a lightweight Python image that runs a small FastAPI application.
@@ -25,9 +25,7 @@ WORKDIR /app
 # We only copy requirements.txt here to keep Docker layer caching efficient.
 COPY requirements.txt .
 
-# Install Python dependencies:
-# --user         → install packages for the current user (not system-wide).
-# --no-cache-dir → avoid keeping pip cache to reduce the final image size.
+# Install Python dependencies without keeping pip cache to reduce image size.
 RUN pip install --no-cache-dir -r requirements.txt
 
 # -----------------------------------------------------------------------------

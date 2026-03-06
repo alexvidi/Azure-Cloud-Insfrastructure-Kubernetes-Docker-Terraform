@@ -1,0 +1,37 @@
+# -----------------------------------------------------------------------------
+# NetworkPolicy for the Market Quote API
+#
+# Goal:
+# - Allow ingress traffic to the app on port 8000.
+# - Deny all egress because the current API does not need outbound network access.
+# -----------------------------------------------------------------------------
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: market-quote-netpol
+  namespace: market-quote
+
+spec:
+  podSelector:
+    matchLabels:
+      app: market-quote-api
+
+  # -----------------------------------------------------------------------------
+  # INGRESS RULES
+  # -----------------------------------------------------------------------------
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8000
+
+  # -----------------------------------------------------------------------------
+  # EGRESS RULES
+  # -----------------------------------------------------------------------------
+  # No egress rules: all outbound traffic is denied for selected pods.
+  egress: []

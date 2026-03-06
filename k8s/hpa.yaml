@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# HorizontalPodAutoscaler for NN Predictor API
+# HorizontalPodAutoscaler for the Market Quote API
 #
 # Goal:
 # - Automatically scale the number of pods based on CPU utilization.
@@ -16,7 +16,8 @@ kind: HorizontalPodAutoscaler
 # METADATA
 # -----------------------------------------------------------------------------
 metadata:
-  name: nn-predictor-hpa
+  name: market-quote-hpa
+  namespace: market-quote
 
 # -----------------------------------------------------------------------------
 # SCALING SPECIFICATION
@@ -26,7 +27,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: nn-predictor-deploy
+    name: market-quote-api
 
   # Minimum and maximum number of pod replicas allowed.
   minReplicas: 2
