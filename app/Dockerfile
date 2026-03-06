@@ -18,6 +18,12 @@ FROM python:3.10-slim
 # All subsequent commands will run from /app.
 WORKDIR /app
 
+# Refresh security patches from the base Debian image before installing Python
+# dependencies so the runtime starts from the latest available package set.
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
+
 # -----------------------------------------------------------------------------
 # DEPENDENCIES INSTALLATION
 # -----------------------------------------------------------------------------
@@ -26,7 +32,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies without keeping pip cache to reduce image size.
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -r requirements.txt
 
 # -----------------------------------------------------------------------------
 # RUNTIME CONFIGURATION
