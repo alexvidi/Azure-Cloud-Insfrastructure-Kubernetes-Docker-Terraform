@@ -55,7 +55,7 @@ Client
 ```text
 Push to master
   -> GitHub Actions Validate workflow
-  -> GitHub Actions Deploy workflow
+  -> GitHub Actions Deploy workflow when infrastructure is active
 
 Deploy workflow
   -> Docker build
@@ -79,7 +79,7 @@ Deploy workflow
   The cluster networking model is aligned with the more current AKS direction for network policy and dataplane support.
 
 - **ClusterIP Service plus Ingress**
-  The application is no longer exposed directly with a `LoadBalancer` Service. The `Service` stays internal and traffic enters through an Ingress Controller. The current manifest omits a fixed host so the demo works through the ingress public IP without requiring local DNS edits.
+  The application uses a `ClusterIP` Service behind an Ingress Controller. The `Service` stays internal and traffic enters through ingress. The current manifest omits a fixed host so the demo works through the ingress public IP without requiring local DNS edits.
 
 - **Baseline runtime hardening**
   The Deployment runs as non-root, disables privilege escalation, drops Linux capabilities, and uses Pod Security Admission in `restricted` mode.
@@ -119,7 +119,7 @@ Endpoints:
 - `GET /metrics`
   Exposed for Prometheus scraping.
 
-The business logic is intentionally lightweight and honest. Instead of pretending to be a real machine learning system, the API returns synthetic quotes for a small supported symbol set so the repository can emphasize cloud delivery and runtime operations.
+The business logic is intentionally lightweight and explicit. The API returns synthetic quotes for a small supported symbol set so the repository can emphasize cloud delivery and runtime operations.
 
 ### Infrastructure
 
