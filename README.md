@@ -299,22 +299,34 @@ The screenshots in [docs/screenshots](docs/screenshots) document a successful en
 ### Infrastructure
 
 ![Azure resource group and provisioned resources](docs/screenshots/infra-azure-resources.png)
+The resource group screenshot shows the core Azure resources created for the project, including AKS, ACR, networking, and Log Analytics.
+
 ![AKS cluster overview](docs/screenshots/infra-aks-cluster-overview.png)
+The AKS overview confirms the managed cluster was provisioned successfully and linked to the container registry used by the deployment pipeline.
 
 ### CI/CD
 
 ![Validate workflow completed successfully](docs/screenshots/ci-validate-workflow-success.png)
+This run shows the validation workflow passing application checks, Terraform validation, Kubernetes schema validation, and IaC security scanning.
+
 ![Deploy workflow completed successfully](docs/screenshots/ci-deploy-job-success.png)
+This deploy run shows the image build, registry push, manifest rollout, and post-deploy smoke test completing successfully.
 
 ### API
 
 ![Swagger UI exposed through the ingress](docs/screenshots/app-browser-swagger-ui.png)
+The Swagger UI screenshot confirms the API was reachable through the Kubernetes ingress from a browser.
+
 ![Quote endpoint returning a synthetic market response](docs/screenshots/app-quote-btc-response.png)
+The quote response screenshot shows the main business endpoint returning the expected JSON contract for a supported symbol.
 
 ### Observability
 
 ![Prometheus scraping the application successfully](docs/screenshots/obs-prometheus-targets-up.png)
+The Prometheus targets page shows the application metrics endpoint being scraped successfully from inside the cluster.
+
 ![Grafana dashboard with live request and latency metrics](docs/screenshots/obs-grafana-dashboard-requests.png)
+The Grafana dashboard shows live request rate, latency, and status-code metrics collected from the running application.
 
 ## Author
 
