@@ -294,37 +294,27 @@ Grafana uses the credentials stored in the `grafana-admin` Secret.
 
 ## Screenshots
 
-The screenshots in [docs/screenshots](docs/screenshots) document the project from Azure provisioning to Kubernetes runtime and monitoring.
+The screenshots in [docs/screenshots](docs/screenshots) document a successful end-to-end Azure run of the project before the cloud resources were deprovisioned to control costs.
 
 ### Infrastructure
 
-![Resources created](docs/screenshots/01-infrastructure/azure-infrastructure-resources.png)
-![ACR registry](docs/screenshots/01-infrastructure/azure-acr-registry-details.png)
-![AKS cluster](docs/screenshots/01-infrastructure/azure-aks-cluster-details.png)
-
-### Kubernetes
-
-![Cluster connection](docs/screenshots/02-kubernetes/k8s-cluster-connection-nodes.png)
-![Deployed resources](docs/screenshots/02-kubernetes/k8s-resources-overview.png)
-![Service details](docs/screenshots/02-kubernetes/k8s-service-loadbalancer-details.png)
+![Azure resource group and provisioned resources](docs/screenshots/infra-azure-resources.png)
+![AKS cluster overview](docs/screenshots/infra-aks-cluster-overview.png)
 
 ### CI/CD
 
-![GitHub Actions checks](docs/screenshots/03-cicd/github-actions-checks-success.png)
+![Validate workflow completed successfully](docs/screenshots/ci-validate-workflow-success.png)
+![Deploy workflow completed successfully](docs/screenshots/ci-deploy-job-success.png)
 
 ### API
 
-![OpenAPI docs](docs/screenshots/04-api/api-swagger-ui.png)
-![Health check](docs/screenshots/04-api/api-health-check-endpoint.png)
-![Synthetic quote response](docs/screenshots/04-api/api-quote-endpoint.png)
+![Swagger UI exposed through the ingress](docs/screenshots/app-browser-swagger-ui.png)
+![Quote endpoint returning a synthetic market response](docs/screenshots/app-quote-btc-response.png)
 
 ### Observability
 
-![Prometheus targets](docs/screenshots/05-monitoring/prometheus-target-health.png)
-![`up` metric](docs/screenshots/05-monitoring/prometheus-up-metric-graph.png)
-![Cluster dashboard](docs/screenshots/05-monitoring/grafana-cluster-dashboard.png)
-![Workloads by namespace](docs/screenshots/05-monitoring/grafana-namespace-workload.png)
-![Azure Monitor for AKS](docs/screenshots/05-monitoring/azure-monitor-aks-insights.png)
+![Prometheus scraping the application successfully](docs/screenshots/obs-prometheus-targets-up.png)
+![Grafana dashboard with live request and latency metrics](docs/screenshots/obs-grafana-dashboard-requests.png)
 
 ## Author
 
