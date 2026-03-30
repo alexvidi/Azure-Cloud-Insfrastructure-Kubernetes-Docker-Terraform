@@ -1,18 +1,7 @@
 # -----------------------------------------------------------------------------
-# Grafana credentials, datasource, and dashboard provisioning
+# Grafana datasource and dashboard provisioning
 # -----------------------------------------------------------------------------
 
-apiVersion: v1
-kind: Secret
-metadata:
-  name: grafana-admin
-  namespace: monitoring
-type: Opaque
-stringData:
-  # Demo-only credentials for local learning. Change before wider exposure.
-  admin-user: admin
-  admin-password: admin
----
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -78,7 +78,7 @@ jobs:
           cache: true
 
       - name: Scan Image with Trivy
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           severity: HIGH,CRITICAL
@@ -135,8 +135,26 @@ jobs:
             --name ${{ secrets.AKS_NAME }} \
             --overwrite-existing
 
-      - name: Apply namespace first
-        run: kubectl apply -f k8s/namespace.yaml
+      - name: Apply namespaces first
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/monitoring-namespace.yaml
+
+      - name: Create Grafana admin secret
+        env:
+          GRAFANA_ADMIN_USER: ${{ secrets.GRAFANA_ADMIN_USER }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+        run: |
+          if [ -z "$GRAFANA_ADMIN_USER" ] || [ -z "$GRAFANA_ADMIN_PASSWORD" ]; then
+            echo "Missing GRAFANA_ADMIN_USER or GRAFANA_ADMIN_PASSWORD GitHub secret."
+            exit 1
+          fi
+
+          kubectl create secret generic grafana-admin \
+            --namespace monitoring \
+            --from-literal=admin-user="$GRAFANA_ADMIN_USER" \
+            --from-literal=admin-password="$GRAFANA_ADMIN_PASSWORD" \
+            --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Apply Kubernetes manifests
         run: kubectl apply -f k8s/

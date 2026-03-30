@@ -79,13 +79,13 @@ Deploy workflow
   The cluster networking model is aligned with the more current AKS direction for network policy and dataplane support.
 
 - **ClusterIP Service plus Ingress**
-  The application is no longer exposed directly with a `LoadBalancer` Service. The `Service` stays internal and traffic enters through an Ingress Controller.
+  The application is no longer exposed directly with a `LoadBalancer` Service. The `Service` stays internal and traffic enters through an Ingress Controller. The current manifest omits a fixed host so the demo works through the ingress public IP without requiring local DNS edits.
 
 - **Baseline runtime hardening**
   The Deployment runs as non-root, disables privilege escalation, drops Linux capabilities, and uses Pod Security Admission in `restricted` mode.
 
 - **Restrictive network posture**
-  The application `NetworkPolicy` allows ingress only on the application port and denies all egress, because the current API does not require outbound network access.
+  The application `NetworkPolicy` allows ingress only from the `ingress-nginx` and `monitoring` namespaces on the application port, and denies all egress because the current API does not require outbound network access.
 
 - **Availability controls**
   The project includes an HPA for CPU-based scaling and a PDB to avoid all replicas being voluntarily disrupted at once.
@@ -108,7 +108,7 @@ docs/screenshots/   Project screenshots
 
 ### Application
 
-The API is implemented in [app/main.py](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/app/main.py).
+The API is implemented in [app/main.py](app/main.py).
 
 Endpoints:
 
@@ -123,7 +123,7 @@ The business logic is intentionally lightweight and honest. Instead of pretendin
 
 ### Infrastructure
 
-Terraform lives under [infra/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/infra).
+Terraform lives under [infra/](infra).
 
 Main modules:
 
@@ -136,34 +136,34 @@ Main modules:
 - `monitoring`
   Creates Log Analytics and monitoring-related resources.
 
-The composition happens in [infra/main.tf](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/infra/main.tf), and AKS receives the `AcrPull` role assignment so the cluster can pull images from ACR.
+The composition happens in [infra/main.tf](infra/main.tf), and AKS receives the `AcrPull` role assignment so the cluster can pull images from ACR.
 
 ### Kubernetes
 
-Raw manifests live in [k8s/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s).
+Raw manifests live in [k8s/](k8s).
 
 Included resources:
 
-- [namespace.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/namespace.yaml)
-- [deployment.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/deployment.yaml)
-- [service.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/service.yaml)
-- [ingress.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/ingress.yaml)
-- [hpa.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/hpa.yaml)
-- [networkpolicy.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/networkpolicy.yaml)
-- [pdb.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/pdb.yaml)
-- [monitoring-namespace.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/monitoring-namespace.yaml)
-- [prometheus-config.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/prometheus-config.yaml)
-- [prometheus.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/prometheus.yaml)
-- [grafana-config.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/grafana-config.yaml)
-- [grafana.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/grafana.yaml)
+- [namespace.yaml](k8s/namespace.yaml)
+- [deployment.yaml](k8s/deployment.yaml)
+- [service.yaml](k8s/service.yaml)
+- [ingress.yaml](k8s/ingress.yaml)
+- [hpa.yaml](k8s/hpa.yaml)
+- [networkpolicy.yaml](k8s/networkpolicy.yaml)
+- [pdb.yaml](k8s/pdb.yaml)
+- [monitoring-namespace.yaml](k8s/monitoring-namespace.yaml)
+- [prometheus-config.yaml](k8s/prometheus-config.yaml)
+- [prometheus.yaml](k8s/prometheus.yaml)
+- [grafana-config.yaml](k8s/grafana-config.yaml)
+- [grafana.yaml](k8s/grafana.yaml)
 
-Together, these manifests cover workload definition, service routing, external entry, scaling, network restriction, disruption handling, and a lightweight monitoring stack.
+Together, these manifests cover workload definition, service routing, external entry, scaling, network restriction, disruption handling, and a lightweight monitoring stack. Grafana admin credentials are intentionally created outside the repo as a Kubernetes Secret.
 
 ### CI/CD
 
 #### Validation Workflow
 
-[.github/workflows/validate.yml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/.github/workflows/validate.yml) runs:
+[.github/workflows/validate.yml](.github/workflows/validate.yml) runs:
 
 - `ruff`
 - `pytest`
@@ -176,19 +176,19 @@ Together, these manifests cover workload definition, service routing, external e
 
 Note:
 
-- `Validate` and `Deploy` are separate workflows in this repository
-- a push to `master` can trigger both workflows independently
-- the deploy workflow is not currently blocked by validate workflow completion
+- `Validate` and `Deploy` are separate workflows so validation and delivery can be rerun independently
+- in a production repository, I would pair this with branch protection so `Validate` must pass before merge to `master`
 
 #### Deploy Workflow
 
-[.github/workflows/deploy.yml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/.github/workflows/deploy.yml) performs:
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml) performs:
 
 - Azure login with OIDC
 - Docker image build
 - Trivy image scan
 - push to ACR
-- namespace creation
+- namespace creation for both workload and monitoring
+- Grafana admin secret creation from GitHub Actions secrets
 - manifest apply
 - Deployment image update to the current commit SHA
 - rollout status verification
@@ -204,11 +204,13 @@ Note:
 
 The application exposes Prometheus metrics at `/metrics`.
 
-The monitoring stack is deployed with raw manifests in [k8s/monitoring-namespace.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/monitoring-namespace.yaml), [k8s/prometheus-config.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/prometheus-config.yaml), [k8s/prometheus.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/prometheus.yaml), [k8s/grafana-config.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/grafana-config.yaml), and [k8s/grafana.yaml](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/k8s/grafana.yaml).
+The monitoring stack is deployed with raw manifests in [k8s/monitoring-namespace.yaml](k8s/monitoring-namespace.yaml), [k8s/prometheus-config.yaml](k8s/prometheus-config.yaml), [k8s/prometheus.yaml](k8s/prometheus.yaml), [k8s/grafana-config.yaml](k8s/grafana-config.yaml), and [k8s/grafana.yaml](k8s/grafana.yaml).
 
-Supporting observability assets remain in [observability/](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability):
+Grafana admin credentials are not committed to the repository. In CI/CD, the deploy workflow creates the `grafana-admin` Secret from the `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD` GitHub secrets. For direct `kubectl` usage, create that Secret manually before applying the manifests.
 
-- source dashboard in [grafana-fastapi-metrics.json](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/observability/grafana-fastapi-metrics.json)
+Supporting observability assets remain in [observability/](observability):
+
+- source dashboard in [grafana-fastapi-metrics.json](observability/grafana-fastapi-metrics.json)
 
 This gives the repository a basic but real monitoring layer instead of stopping at deployment only.
 
@@ -224,6 +226,7 @@ The repository includes baseline controls that are justified by the current work
 - resource requests and limits
 - `NetworkPolicy` with denied egress by default
 - AKS managed identity plus `AcrPull` for image pulls
+- Grafana admin credentials externalized into a Kubernetes Secret
 - Trivy image scanning in CI
 - Checkov scanning for Terraform
 
@@ -249,19 +252,27 @@ terraform apply
 
 ```bash
 kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/monitoring-namespace.yaml
+kubectl create secret generic grafana-admin \
+  -n monitoring \
+  --from-literal=admin-user=admin \
+  --from-literal=admin-password='<strong-password>' \
+  --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f k8s/
 ```
 
 Prerequisite:
 
 - an Ingress Controller such as `ingress-nginx` must already exist in the cluster
+- the current `NetworkPolicy` assumes the ingress controller runs in the `ingress-nginx` namespace; adjust the namespace selector if your installation uses another namespace
 - direct `kubectl apply` uses the default image reference defined in `k8s/deployment.yaml`
 - the CI/CD workflow updates that image to the current commit SHA after applying the manifests
+- the CI/CD workflow also creates the `grafana-admin` Secret from GitHub Actions secrets before applying manifests
 - the raw monitoring stack is included in the `k8s/monitoring-*.yaml`, `k8s/prometheus*.yaml`, and `k8s/grafana*.yaml` manifests and deploys into the `monitoring` namespace
 
 ### 4. Access the Application
 
-After the Ingress is active and the host points to the controller, the API is reachable through the configured Ingress host.
+After the Ingress is active, the API is reachable through the ingress controller public IP. If you want a friendly hostname, add a DNS record and an optional TLS block to `k8s/ingress.yaml`.
 
 ### 5. Access Observability
 
@@ -279,14 +290,11 @@ Then open:
 - `http://127.0.0.1:9090` for Prometheus
 - `http://127.0.0.1:3000` for Grafana
 
-Grafana demo credentials:
-
-- username: `admin`
-- password: `admin`
+Grafana uses the credentials stored in the `grafana-admin` Secret.
 
 ## Screenshots
 
-The screenshots in [docs/screenshots](/c:/Users/alexv/Projects/Azure%20Cloud%20Infrastructure%20Kubernetes%20Docker%20Terraform/docs/screenshots) document the project from Azure provisioning to Kubernetes runtime and monitoring.
+The screenshots in [docs/screenshots](docs/screenshots) document the project from Azure provisioning to Kubernetes runtime and monitoring.
 
 ### Infrastructure
 

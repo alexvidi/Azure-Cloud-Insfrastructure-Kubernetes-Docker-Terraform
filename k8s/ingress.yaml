@@ -16,8 +16,10 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: market-quote.example.com
-      http:
+    # Host intentionally omitted so the demo works directly through the ingress
+    # public IP. Add a host and TLS block here when fronting the app with a real
+    # domain.
+    - http:
         paths:
           - path: /
             pathType: Prefix

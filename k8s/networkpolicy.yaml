@@ -2,7 +2,7 @@
 # NetworkPolicy for the Market Quote API
 #
 # Goal:
-# - Allow ingress traffic to the app on port 8000.
+# - Allow ingress traffic only from the ingress controller and monitoring namespaces.
 # - Deny all egress because the current API does not need outbound network access.
 # -----------------------------------------------------------------------------
 
@@ -26,7 +26,21 @@ spec:
     - Egress
 
   ingress:
-    - ports:
+    # Allow HTTP traffic from the ingress controller namespace.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+
+    # Allow Prometheus in the monitoring namespace to scrape /metrics.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
         - protocol: TCP
           port: 8000
 
