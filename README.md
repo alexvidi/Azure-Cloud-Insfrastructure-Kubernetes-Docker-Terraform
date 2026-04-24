@@ -37,7 +37,7 @@ The project is deliberately scoped to stay coherent. Features that were not just
 
 ### High-Level Architecture
 
-![Architecture diagram](docs/architecture-diagram.svg)
+![Project flow overview](docs/project-flow-overview.svg)
 
 ### Runtime Request Flow
 
