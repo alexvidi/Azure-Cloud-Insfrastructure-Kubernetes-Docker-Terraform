@@ -55,9 +55,11 @@ Client
 ```text
 Push to master
   -> GitHub Actions Validate workflow
-  -> GitHub Actions Deploy workflow when infrastructure is active
+  -> GitHub Actions Deploy workflow when Validate succeeds and the commit
+     changes application runtime files or Kubernetes manifests
 
 Deploy workflow
+  -> Detect deploy-relevant changes
   -> Docker build
   -> Trivy image scan
   -> Push image to ACR
@@ -100,7 +102,7 @@ app/                FastAPI application and Dockerfile
 infra/              Terraform root and modules
 k8s/                Raw Kubernetes manifests
 .github/workflows/  Validation and deployment pipelines
-docs/screenshots/   Project screenshots
+docs/               Architecture diagram and project screenshots
 ```
 
 ## Main Components
@@ -173,10 +175,13 @@ Together, these manifests cover workload definition, service routing, external e
 - `checkov`
 - `kubeconform`
 
+The Python validation tooling is installed from `app/requirements-dev.txt`, where the development and CI dependencies are pinned for reproducible runs.
+
 Note:
 
 - `Validate` and `Deploy` remain separate workflows so validation and delivery stay cleanly separated
 - `Deploy` now runs after a successful `Validate` workflow on `master`
+- `Deploy` only continues when the validated commit changes application runtime files or Kubernetes manifests
 - in a production repository, I would still pair this with branch protection so `Validate` must pass before merge to `master`
 
 #### Deploy Workflow
@@ -184,6 +189,7 @@ Note:
 [.github/workflows/deploy.yml](.github/workflows/deploy.yml) performs:
 
 - Azure login with OIDC
+- deploy-relevant change detection on the validated commit
 - Docker image build
 - Trivy image scan
 - push to ACR

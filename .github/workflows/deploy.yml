@@ -10,6 +10,8 @@
 # Triggers:
 # - Completion of the Validate workflow on master.
 # - Only proceeds when Validate finishes successfully.
+# - Builds and deploys only when the validated commit changes application
+#   runtime files or Kubernetes manifests.
 # -----------------------------------------------------------------------------
 
 name: Deploy
@@ -32,10 +34,66 @@ permissions:
 
 jobs:
   # -----------------------------------------------------------------------------
+  # JOB 0: DETECT WHETHER THIS COMMIT REQUIRES AN APPLICATION DEPLOYMENT
+  # -----------------------------------------------------------------------------
+  changes:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Detect Deploy-Relevant Changes
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_required: ${{ steps.filter.outputs.deploy_required }}
+    steps:
+      - name: Checkout validated commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.IMAGE_TAG }}
+          fetch-depth: 2
+
+      - name: Detect changed files
+        id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # If GitHub does not provide the parent commit in history, prefer
+          # deploying rather than accidentally skipping a real runtime change.
+          if ! git rev-parse HEAD^ >/dev/null 2>&1; then
+            echo "No parent commit available. Requiring deploy by default."
+            echo "deploy_required=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed_files="$(git diff --name-only HEAD^ HEAD)"
+          echo "Changed files:"
+          echo "$changed_files"
+
+          deploy_required=false
+
+          # Only rebuild and redeploy when the validated commit changes the
+          # runtime image inputs or the raw Kubernetes manifests.
+          while IFS= read -r file; do
+            case "$file" in
+              k8s/*)
+                deploy_required=true
+                break
+                ;;
+              app/tests/*|app/requirements-dev.txt)
+                ;;
+              app/main.py|app/__init__.py|app/requirements.txt|app/Dockerfile|app/.dockerignore)
+                deploy_required=true
+                break
+                ;;
+            esac
+          done <<< "$changed_files"
+
+          echo "deploy_required=$deploy_required" >> "$GITHUB_OUTPUT"
+
+  # -----------------------------------------------------------------------------
   # JOB 1: BUILD, SCAN, AND PUSH IMAGE
   # -----------------------------------------------------------------------------
   build_and_push:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ needs.changes.outputs.deploy_required == 'true' }}
+    needs: changes
     name: Build, Scan, and Push
     runs-on: ubuntu-latest
     env:
@@ -111,9 +169,10 @@ jobs:
   # JOB 2: DEPLOY TO AKS WITH RAW MANIFESTS
   # -----------------------------------------------------------------------------
   deploy:
+    if: ${{ needs.changes.outputs.deploy_required == 'true' }}
     name: Deploy to AKS (manifests)
     runs-on: ubuntu-latest
-    needs: build_and_push
+    needs: [changes, build_and_push]
     env:
       REGISTRY: ${{ secrets.ACR_NAME }}.azurecr.io
     steps:
@@ -247,3 +306,12 @@ jobs:
           kubectl get svc -n ${{ env.K8S_NAMESPACE }}
           kubectl describe deployment -n ${{ env.K8S_NAMESPACE }} market-quote-api
           kubectl logs -n ${{ env.K8S_NAMESPACE }} deployment/market-quote-api --tail=100
+
+  no_deploy_needed:
+    if: ${{ needs.changes.outputs.deploy_required != 'true' }}
+    needs: changes
+    name: No Deploy Needed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain skip
+        run: echo "No deploy-relevant changes detected. Skipping build and deploy."
