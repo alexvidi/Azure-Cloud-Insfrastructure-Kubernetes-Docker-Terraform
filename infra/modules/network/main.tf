@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 # Goal:
 # - Provide an isolated address space for the cluster.
-# - Delegate the subnet to Microsoft.ContainerService for Azure CNI.
+# - Create a dedicated subnet that AKS will attach to the node pool for Azure CNI.
 # -----------------------------------------------------------------------------
 
 resource "azurerm_virtual_network" "this" {

@@ -42,7 +42,7 @@ spec:
 
           # Docker image stored in Azure Container Registry.
           # This default value supports direct kubectl-based deployments.
-          # The GitHub Actions deploy workflow overrides it with the current commit SHA.
+          # The GitHub Actions deploy workflow overrides it with the validated commit SHA.
           image: alexdevops99acr.azurecr.io/market-quote-api:v1
 
           # Internal port exposed by the container (Uvicorn listens here).

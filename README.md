@@ -99,7 +99,6 @@ Deploy workflow
 app/                FastAPI application and Dockerfile
 infra/              Terraform root and modules
 k8s/                Raw Kubernetes manifests
-observability/      Prometheus, Grafana, sample dashboard
 .github/workflows/  Validation and deployment pipelines
 docs/screenshots/   Project screenshots
 ```
@@ -176,8 +175,9 @@ Together, these manifests cover workload definition, service routing, external e
 
 Note:
 
-- `Validate` and `Deploy` are separate workflows so validation and delivery can be rerun independently
-- in a production repository, I would pair this with branch protection so `Validate` must pass before merge to `master`
+- `Validate` and `Deploy` remain separate workflows so validation and delivery stay cleanly separated
+- `Deploy` now runs after a successful `Validate` workflow on `master`
+- in a production repository, I would still pair this with branch protection so `Validate` must pass before merge to `master`
 
 #### Deploy Workflow
 
@@ -190,7 +190,7 @@ Note:
 - namespace creation for both workload and monitoring
 - Grafana admin secret creation from GitHub Actions secrets
 - manifest apply
-- Deployment image update to the current commit SHA
+- Deployment image update to the validated commit SHA
 - rollout status verification
 - post-deploy smoke test against `/health` and `/quote` on the Kubernetes Service
 - failure diagnostics with `kubectl get`, `describe`, and application logs
@@ -198,7 +198,7 @@ Note:
 Note:
 
 - the Deployment manifest keeps a default image reference for direct `kubectl apply` usage
-- the GitHub Actions deploy workflow overrides that image with the current commit SHA during CI/CD
+- the GitHub Actions deploy workflow overrides that image with the validated commit SHA during CI/CD
 
 ### Observability
 
@@ -207,10 +207,6 @@ The application exposes Prometheus metrics at `/metrics`.
 The monitoring stack is deployed with raw manifests in [k8s/monitoring-namespace.yaml](k8s/monitoring-namespace.yaml), [k8s/prometheus-config.yaml](k8s/prometheus-config.yaml), [k8s/prometheus.yaml](k8s/prometheus.yaml), [k8s/grafana-config.yaml](k8s/grafana-config.yaml), and [k8s/grafana.yaml](k8s/grafana.yaml).
 
 Grafana admin credentials are not committed to the repository. In CI/CD, the deploy workflow creates the `grafana-admin` Secret from the `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD` GitHub secrets. For direct `kubectl` usage, create that Secret manually before applying the manifests.
-
-Supporting observability assets remain in [observability/](observability):
-
-- source dashboard in [grafana-fastapi-metrics.json](observability/grafana-fastapi-metrics.json)
 
 This gives the repository a basic but real monitoring layer instead of stopping at deployment only.
 
@@ -266,7 +262,7 @@ Prerequisite:
 - an Ingress Controller such as `ingress-nginx` must already exist in the cluster
 - the current `NetworkPolicy` assumes the ingress controller runs in the `ingress-nginx` namespace; adjust the namespace selector if your installation uses another namespace
 - direct `kubectl apply` uses the default image reference defined in `k8s/deployment.yaml`
-- the CI/CD workflow updates that image to the current commit SHA after applying the manifests
+- the CI/CD workflow updates that image to the validated commit SHA after applying the manifests
 - the CI/CD workflow also creates the `grafana-admin` Secret from GitHub Actions secrets before applying manifests
 - the raw monitoring stack is included in the `k8s/monitoring-*.yaml`, `k8s/prometheus*.yaml`, and `k8s/grafana*.yaml` manifests and deploys into the `monitoring` namespace
 
