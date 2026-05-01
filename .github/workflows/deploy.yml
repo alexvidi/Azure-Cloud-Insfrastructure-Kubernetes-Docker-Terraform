@@ -4,6 +4,7 @@
 # Goal:
 # - Build the FastAPI Docker image and push to ACR using OIDC (no passwords).
 # - Scan the container image with Trivy (fail on HIGH/CRITICAL).
+# - Ensure the ingress-nginx controller exists in AKS.
 # - Deploy to AKS using raw Kubernetes manifests (kubectl apply) and set the
 #   image tag to the validated commit SHA.
 #
@@ -193,6 +194,11 @@ jobs:
             --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} \
             --name ${{ secrets.AKS_NAME }} \
             --overwrite-existing
+
+      - name: Ensure ingress-nginx controller is installed
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/cloud/deploy.yaml
+          kubectl rollout status -n ingress-nginx deployment/ingress-nginx-controller --timeout=180s
 
       - name: Apply namespaces first
         run: |

@@ -63,6 +63,7 @@ Deploy workflow
   -> Docker build
   -> Trivy image scan
   -> Push image to ACR
+  -> Ensure ingress-nginx controller exists
   -> kubectl apply manifests to AKS
   -> Update Deployment image to commit SHA
   -> Wait for rollout completion
@@ -193,6 +194,7 @@ Note:
 - Docker image build
 - Trivy image scan
 - push to ACR
+- ingress-nginx controller installation/update from the official cloud manifest
 - namespace creation for both workload and monitoring
 - Grafana admin secret creation from GitHub Actions secrets
 - manifest apply
@@ -253,6 +255,8 @@ terraform apply
 ### 3. Deploy to Kubernetes
 
 ```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/cloud/deploy.yaml
+kubectl rollout status -n ingress-nginx deployment/ingress-nginx-controller --timeout=180s
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/monitoring-namespace.yaml
 kubectl create secret generic grafana-admin \
@@ -263,9 +267,10 @@ kubectl create secret generic grafana-admin \
 kubectl apply -f k8s/
 ```
 
-Prerequisite:
+Notes:
 
-- an Ingress Controller such as `ingress-nginx` must already exist in the cluster
+- the CI/CD workflow installs or updates `ingress-nginx` before applying the application manifests
+- direct `kubectl apply` usage should install the same ingress controller first, as shown above
 - the current `NetworkPolicy` assumes the ingress controller runs in the `ingress-nginx` namespace; adjust the namespace selector if your installation uses another namespace
 - direct `kubectl apply` uses the default image reference defined in `k8s/deployment.yaml`
 - the CI/CD workflow updates that image to the validated commit SHA after applying the manifests
