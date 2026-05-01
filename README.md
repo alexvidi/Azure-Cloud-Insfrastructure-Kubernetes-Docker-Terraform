@@ -279,7 +279,7 @@ Notes:
 
 ### 4. Access the Application
 
-After the Ingress is active, the API is reachable through the ingress controller public IP. If you want a friendly hostname, add a DNS record and an optional TLS block to `k8s/ingress.yaml`.
+After the Ingress Controller assigns a public IP, the API is reachable through that IP because `k8s/ingress.yaml` does not require a host name. This keeps the demo simple and avoids depending on a custom domain. In a production-style setup, a DNS record would normally point a domain name to the ingress public IP, and TLS would be configured on the Ingress.
 
 ### 5. Access Observability
 
