@@ -31,7 +31,7 @@ The project is deliberately scoped to stay coherent. Features that were not just
 | Packaging | Raw Kubernetes manifests |
 | CI/CD | GitHub Actions validate and deploy workflows |
 | Security | Pod Security Admission, container hardening, Trivy, Checkov |
-| Observability | Prometheus + Grafana via raw Kubernetes manifests |
+| Observability | Prometheus + Alertmanager + Grafana via raw Kubernetes manifests |
 
 ## Architecture
 
@@ -156,10 +156,12 @@ Included resources:
 - [monitoring-namespace.yaml](k8s/monitoring-namespace.yaml)
 - [prometheus-config.yaml](k8s/prometheus-config.yaml)
 - [prometheus.yaml](k8s/prometheus.yaml)
+- [alertmanager-config.yaml](k8s/alertmanager-config.yaml)
+- [alertmanager.yaml](k8s/alertmanager.yaml)
 - [grafana-config.yaml](k8s/grafana-config.yaml)
 - [grafana.yaml](k8s/grafana.yaml)
 
-Together, these manifests cover workload definition, service routing, external entry, scaling, network restriction, disruption handling, and a lightweight monitoring stack. Grafana admin credentials are intentionally created outside the repo as a Kubernetes Secret.
+Together, these manifests cover workload definition, service routing, external entry, scaling, network restriction, disruption handling, alert routing, and a lightweight monitoring stack. Grafana admin credentials and Alertmanager SMTP credentials are intentionally created outside the repo as Kubernetes Secrets.
 
 ### CI/CD
 
@@ -197,7 +199,9 @@ Note:
 - ingress-nginx controller installation/update from the official cloud manifest
 - namespace creation for both workload and monitoring
 - Grafana admin secret creation from GitHub Actions secrets
+- Alertmanager SMTP secret creation from GitHub Actions secrets
 - manifest apply
+- monitoring Deployment restart after Prometheus or Alertmanager config updates
 - Deployment image update to the validated commit SHA
 - rollout status verification
 - post-deploy smoke test against `/health` and `/quote` on the Kubernetes Service
@@ -212,11 +216,31 @@ Note:
 
 The application exposes Prometheus metrics at `/metrics`.
 
-The monitoring stack is deployed with raw manifests in [k8s/monitoring-namespace.yaml](k8s/monitoring-namespace.yaml), [k8s/prometheus-config.yaml](k8s/prometheus-config.yaml), [k8s/prometheus.yaml](k8s/prometheus.yaml), [k8s/grafana-config.yaml](k8s/grafana-config.yaml), and [k8s/grafana.yaml](k8s/grafana.yaml).
+The monitoring stack is deployed with raw manifests in [k8s/monitoring-namespace.yaml](k8s/monitoring-namespace.yaml), [k8s/prometheus-config.yaml](k8s/prometheus-config.yaml), [k8s/prometheus.yaml](k8s/prometheus.yaml), [k8s/alertmanager-config.yaml](k8s/alertmanager-config.yaml), [k8s/alertmanager.yaml](k8s/alertmanager.yaml), [k8s/grafana-config.yaml](k8s/grafana-config.yaml), and [k8s/grafana.yaml](k8s/grafana.yaml).
+
+Grafana is provisioned from Kubernetes ConfigMaps instead of being configured manually after deployment. The datasource in [k8s/grafana-config.yaml](k8s/grafana-config.yaml) points Grafana to the in-cluster Prometheus Service, and the dashboard definition is mounted into Grafana at startup.
+
+The included dashboard covers the main API signals used by this project:
+
+- request rate
+- total request count
+- 4xx and 5xx response rates
+- Prometheus target availability
+- p95 HTTP latency
+- request volume by status code
 
 Grafana admin credentials are not committed to the repository. In CI/CD, the deploy workflow creates the `grafana-admin` Secret from the `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD` GitHub secrets. For direct `kubectl` usage, create that Secret manually before applying the manifests.
 
-This gives the repository a basic but real monitoring layer instead of stopping at deployment only.
+Alertmanager SMTP credentials are also kept out of the repository. In CI/CD, the deploy workflow creates the `alertmanager-smtp` Secret from the `ALERTMANAGER_SMTP_PASSWORD` GitHub secret. For direct `kubectl` usage, create that Secret manually before applying the manifests.
+
+Prometheus evaluates two baseline alerting rules:
+
+- `MarketQuoteApiDown`
+  Fires when Prometheus cannot scrape the Market Quote API target for more than 2 minutes.
+- `MarketQuoteApiHighServerErrorRate`
+  Fires when more than 5% of Market Quote API requests return 5xx responses for 5 minutes.
+
+This gives the repository a basic but real monitoring and alerting layer instead of stopping at deployment only.
 
 ## Security Posture
 
@@ -231,6 +255,7 @@ The repository includes baseline controls that are justified by the current work
 - `NetworkPolicy` with denied egress by default
 - AKS managed identity plus `AcrPull` for image pulls
 - Grafana admin credentials externalized into a Kubernetes Secret
+- Alertmanager SMTP credentials externalized into a Kubernetes Secret
 - Trivy image scanning in CI
 - Checkov scanning for Terraform
 
@@ -264,7 +289,14 @@ kubectl create secret generic grafana-admin \
   --from-literal=admin-user=admin \
   --from-literal=admin-password='<strong-password>' \
   --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic alertmanager-smtp \
+  -n monitoring \
+  --from-literal=smtp-password='<smtp-app-password>' \
+  --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f k8s/
+kubectl rollout restart -n monitoring deployment/prometheus-server deployment/alertmanager
+kubectl rollout status -n monitoring deployment/prometheus-server --timeout=180s
+kubectl rollout status -n monitoring deployment/alertmanager --timeout=180s
 ```
 
 Notes:
@@ -275,7 +307,10 @@ Notes:
 - direct `kubectl apply` uses the default image reference defined in `k8s/deployment.yaml`
 - the CI/CD workflow updates that image to the validated commit SHA after applying the manifests
 - the CI/CD workflow also creates the `grafana-admin` Secret from GitHub Actions secrets before applying manifests
-- the raw monitoring stack is included in the `k8s/monitoring-*.yaml`, `k8s/prometheus*.yaml`, and `k8s/grafana*.yaml` manifests and deploys into the `monitoring` namespace
+- the CI/CD workflow also creates the `alertmanager-smtp` Secret from the `ALERTMANAGER_SMTP_PASSWORD` GitHub secret before applying manifests
+- the Alertmanager email receiver is configured for Gmail SMTP in `k8s/alertmanager-config.yaml`; use an app password rather than a personal account password
+- Prometheus and Alertmanager are restarted after manifest apply so updated alerting configuration is loaded
+- the raw monitoring stack is included in the `k8s/monitoring-*.yaml`, `k8s/prometheus*.yaml`, `k8s/alertmanager*.yaml`, and `k8s/grafana*.yaml` manifests and deploys into the `monitoring` namespace
 
 ### 4. Access the Application
 
@@ -283,21 +318,37 @@ After the Ingress Controller assigns a public IP, the API is reachable through t
 
 ### 5. Access Observability
 
-Prometheus and Grafana are deployed into the `monitoring` namespace by the raw monitoring manifests under `k8s/`.
+Prometheus, Alertmanager, and Grafana are deployed into the `monitoring` namespace by the raw monitoring manifests under `k8s/`.
 
 To access them locally:
 
 ```bash
 kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
+kubectl port-forward -n monitoring svc/alertmanager 9093:9093
 kubectl port-forward -n monitoring svc/grafana 3000:3000
 ```
 
 Then open:
 
 - `http://127.0.0.1:9090` for Prometheus
+- `http://127.0.0.1:9093` for Alertmanager
 - `http://127.0.0.1:3000` for Grafana
 
 Grafana uses the credentials stored in the `grafana-admin` Secret.
+
+The Market Quote API dashboard is provisioned automatically and is available in the `Market Quote API` folder after Grafana starts.
+
+To simulate the `MarketQuoteApiDown` alert:
+
+```bash
+kubectl scale deployment market-quote-api -n market-quote --replicas=0
+```
+
+After the alert fires, restore the application:
+
+```bash
+kubectl scale deployment market-quote-api -n market-quote --replicas=2
+```
 
 ## Screenshots
 

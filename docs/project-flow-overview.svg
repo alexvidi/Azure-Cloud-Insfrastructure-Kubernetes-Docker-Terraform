@@ -1,6 +1,6 @@
 <svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
   <title>FastAPI on Azure AKS - High Level Project Flow</title>
-  <desc>High-level professional flow diagram for a FastAPI service delivered to Azure AKS with Terraform, Docker, GitHub Actions, Kubernetes, and observability.</desc>
+  <desc>High-level professional flow diagram for a FastAPI service delivered to Azure AKS with Terraform, Docker, GitHub Actions, Kubernetes, observability, and alerting.</desc>
 
   <defs>
     <linearGradient id="page" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
@@ -134,7 +134,7 @@
   <g transform="translate(88 74)">
     <text x="0" y="0" class="eyebrow">CLOUD-NATIVE DELIVERY OVERVIEW</text>
     <text x="0" y="58" class="title">FastAPI on Azure AKS</text>
-    <text x="0" y="94" class="subtitle">A cloud-native flow for a containerized FastAPI service: IaC, CI/CD, AKS, security and observability.</text>
+    <text x="0" y="94" class="subtitle">A cloud-native FastAPI on AKS flow: IaC, CI/CD, security, observability and alerting.</text>
   </g>
 
   <g transform="translate(1038 72)">
@@ -197,13 +197,14 @@
   </g>
 
   <g transform="translate(1178 602)">
-    <rect width="344" height="170" rx="28" fill="url(#observe)" stroke="#E6D1B5" filter="url(#shadow)"/>
+    <rect width="344" height="196" rx="28" fill="url(#observe)" stroke="#E6D1B5" filter="url(#shadow)"/>
     <circle cx="42" cy="44" r="20" fill="#D97706"/>
     <path d="M 33 53 C 36 43 39 39 43 44 C 48 51 51 39 56 35" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <text x="76" y="50" class="card-title">Observability</text>
+    <text x="76" y="50" class="card-title">Observability &amp; Alerts</text>
     <text x="34" y="88" class="card-text">Prometheus scrapes /metrics</text>
     <text x="34" y="116" class="card-text">Grafana visualizes traffic and latency</text>
-    <text x="34" y="144" class="card-text">Azure diagnostics in Log Analytics</text>
+    <text x="34" y="144" class="card-text">Alertmanager sends email alerts</text>
+    <text x="34" y="172" class="card-text">Azure diagnostics in Log Analytics</text>
   </g>
 
   <!-- Flow arrows -->
@@ -223,7 +224,7 @@
   <g transform="translate(88 626)">
     <rect width="938" height="146" rx="28" fill="#FFFFFF" stroke="#D7E1E8" filter="url(#shadow)"/>
     <text x="34" y="48" class="card-title">What this project demonstrates</text>
-    <text x="34" y="84" class="card-text">A complete DevOps/Cloud workflow around a real API workload, from source code to monitored AKS runtime.</text>
+    <text x="34" y="84" class="card-text">A complete DevOps/Cloud workflow around a real API workload, from source code to observable AKS runtime with alerting.</text>
 
     <rect x="34" y="106" width="118" height="28" rx="14" fill="#DBEAFE"/>
     <text x="60" y="125" class="chip">IaC</text>
@@ -236,11 +237,11 @@
     <rect x="590" y="106" width="142" height="28" rx="14" fill="#F1F5F9"/>
     <text x="614" y="125" class="chip">Security</text>
     <rect x="746" y="106" width="158" height="28" rx="14" fill="#FCE7F3"/>
-    <text x="770" y="125" class="chip">Observability</text>
+    <text x="764" y="125" class="chip">Monitoring + Alerts</text>
   </g>
 
   <g transform="translate(88 820)">
     <rect width="1434" height="42" rx="21" fill="#FFFFFF" stroke="#D7E1E8"/>
-    <text x="344" y="27" class="footer">Outcome: a containerized FastAPI service deployed to Azure AKS with automated delivery, security gates and monitoring.</text>
+    <text x="316" y="27" class="footer">Outcome: a containerized FastAPI service deployed to Azure AKS with automated delivery, security gates, monitoring and alerting.</text>
   </g>
 </svg>

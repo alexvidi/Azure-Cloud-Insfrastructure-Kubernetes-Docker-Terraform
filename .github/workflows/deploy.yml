@@ -221,8 +221,28 @@ jobs:
             --from-literal=admin-password="$GRAFANA_ADMIN_PASSWORD" \
             --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Create Alertmanager SMTP secret
+        env:
+          ALERTMANAGER_SMTP_PASSWORD: ${{ secrets.ALERTMANAGER_SMTP_PASSWORD }}
+        run: |
+          if [ -z "$ALERTMANAGER_SMTP_PASSWORD" ]; then
+            echo "Missing ALERTMANAGER_SMTP_PASSWORD GitHub secret."
+            exit 1
+          fi
+
+          kubectl create secret generic alertmanager-smtp \
+            --namespace monitoring \
+            --from-literal=smtp-password="$ALERTMANAGER_SMTP_PASSWORD" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Apply Kubernetes manifests
         run: kubectl apply -f k8s/
+
+      - name: Restart monitoring deployments after config updates
+        run: |
+          kubectl rollout restart -n monitoring deployment/prometheus-server deployment/alertmanager
+          kubectl rollout status -n monitoring deployment/prometheus-server --timeout=180s
+          kubectl rollout status -n monitoring deployment/alertmanager --timeout=180s
 
       - name: Update deployment image to validated commit
         run: |
