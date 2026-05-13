@@ -16,7 +16,7 @@ The application itself is intentionally simple. The focus of the repository is t
 - application runtime on Azure Kubernetes Service
 - Kubernetes deployment with Ingress, autoscaling, network restrictions, and disruption controls
 - CI/CD validation and deployment with GitHub Actions
-- Prometheus metrics and Grafana dashboards
+- Prometheus metrics, Alertmanager email alerts, and Grafana dashboards
 
 The project is deliberately scoped to stay coherent. Features that were not justified by the current workload were left out so the repository reflects the technologies that are actually being used.
 
