@@ -41,6 +41,30 @@ variable "authorized_ip_ranges" {
   default     = []
 }
 
+# AKS node configuration.
+variable "node_count" {
+  description = "Number of nodes in the default AKS node pool."
+  type        = number
+  default     = 1
+}
+
+variable "node_vm_size" {
+  description = "VM size for the AKS node pool."
+  type        = string
+  default     = "Standard_B2s"
+}
+
+variable "admin_group_object_ids" {
+  description = "Azure AD group Object IDs granted AKS admin access."
+  type        = list(string)
+  default     = []
+}
+
+variable "github_sp_object_id" {
+  description = "Object ID of the GitHub Actions Service Principal. Grants AKS cluster-admin via Azure RBAC."
+  type        = string
+}
+
 # -----------------------------------------------------------------------------
 # Observability
 # -----------------------------------------------------------------------------

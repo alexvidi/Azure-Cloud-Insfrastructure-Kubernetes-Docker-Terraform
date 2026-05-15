@@ -37,10 +37,10 @@ module "aks" {
   location               = var.location
   resource_group_name    = azurerm_resource_group.rg.name
   subnet_id              = module.network.aks_subnet_id
-  node_count             = 1
-  node_vm_size           = "Standard_B2s"
+  node_count             = var.node_count
+  node_vm_size           = var.node_vm_size
   authorized_ip_ranges   = var.authorized_ip_ranges
-  admin_group_object_ids = []
+  admin_group_object_ids = var.admin_group_object_ids
 }
 
 module "monitoring" {
@@ -54,10 +54,19 @@ module "monitoring" {
 }
 
 # -----------------------------------------------------------------------------
-# ACR pull permissions for AKS managed identity
+# ROLE ASSIGNMENTS
 # -----------------------------------------------------------------------------
+
 resource "azurerm_role_assignment" "aks_acr_pull" {
   scope                = module.registry.acr_id
   role_definition_name = "AcrPull"
   principal_id         = module.aks.aks_kubelet_object_id
+}
+
+# GitHub Actions Service Principal needs cluster-admin access to apply manifests,
+# create Secrets, install ingress-nginx, and run post-deploy smoke tests.
+resource "azurerm_role_assignment" "github_aks_admin" {
+  scope                = module.aks.aks_id
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  principal_id         = var.github_sp_object_id
 }

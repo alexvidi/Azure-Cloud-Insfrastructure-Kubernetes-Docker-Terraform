@@ -190,7 +190,6 @@ jobs:
       - name: Get AKS Credentials
         run: |
           az aks get-credentials \
-            --admin \
             --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} \
             --name ${{ secrets.AKS_NAME }} \
             --overwrite-existing

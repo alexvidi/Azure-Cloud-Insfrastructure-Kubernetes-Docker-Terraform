@@ -304,6 +304,20 @@ az storage container create \
 
 ### 2. Provision Azure Infrastructure
 
+The `github_sp_object_id` variable is required. It is the Object ID of the Service Principal used by GitHub Actions (visible in Azure AD → Enterprise applications). Obtain it with:
+
+```bash
+az ad sp show --id <AZURE_CLIENT_ID> --query id -o tsv
+```
+
+Add it to `infra/terraform.tfvars` (already covered by `.gitignore`):
+
+```hcl
+github_sp_object_id = "<object-id>"
+```
+
+Then provision:
+
 ```bash
 cd infra
 terraform init
